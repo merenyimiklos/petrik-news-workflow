@@ -68,6 +68,7 @@ trait PNW_Frontend_Shell_Trait {
             'empty_fields'        => 'Add meg a felhasználóneved/e-mail címed és a jelszavad.',
             'invalid_credentials' => 'A megadott felhasználónév/e-mail cím vagy jelszó nem megfelelő.',
             'no_access'           => 'Ezzel a felhasználóval nincs jogosultság a Petrik Hírkezelő használatához.',
+            'security'            => 'A belépési kérés lejárt vagy érvénytelen. Töltsd újra az oldalt és próbáld újra.',
         );
 
         echo '<section class="pnw-login-card">';
@@ -82,8 +83,10 @@ trait PNW_Frontend_Shell_Trait {
             echo '<div class="pnw-notice pnw-notice-error pnw-login-error">' . esc_html( $messages[ $error ] ) . '</div>';
         }
 
-        echo '<form class="pnw-login-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-        echo '<input type="hidden" name="action" value="pnw_frontend_login">';
+        // Intentionally POST to the public Hírkezelő URL, not /wp-admin.
+        // This keeps login compatible with WPS Hide Login and similar plugins.
+        echo '<form class="pnw-login-form" method="post" action="' . esc_url( PNW_Plugin::manager_url() ) . '">';
+        echo '<input type="hidden" name="pnw_frontend_action" value="login">';
         wp_nonce_field( 'pnw_frontend_login', 'pnw_login_nonce' );
         echo '<p class="login-username"><label for="pnw-login-user">Felhasználónév vagy e-mail</label><input id="pnw-login-user" type="text" name="pnw_login" autocomplete="username" required></p>';
         echo '<p class="login-password"><label for="pnw-login-password">Jelszó</label><input id="pnw-login-password" type="password" name="pnw_password" autocomplete="current-password" required></p>';
@@ -114,7 +117,7 @@ trait PNW_Frontend_Shell_Trait {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a>';
         }
         if ( current_user_can( 'pnw_view_audit_log' ) ) {
-            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) ) . '">Napló</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) . '">Napló</a>';
         }
         echo '<a class="pnw-nav-spacer" href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">Kijelentkezés</a>';
         echo '</nav>';
