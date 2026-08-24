@@ -1,8 +1,8 @@
 {
-  "version": "1.0.10-test",
+  "version": "1.0.11-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
-  "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/agent/initial-wordpress-workflow.zip",
-  "changelog": "GitHub updater próba + admin/MK szerepkör capability-diagnosztika. Ez a verzió már kézi ZIP-feltöltés nélkül, a WordPress natív frissítőjén keresztül telepítendő."
+  "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
+  "changelog": "MK-vezető login session javítás: a sikeres jelszóellenőrzés után a WordPress auth cookie újra létrejön, a külső role-based wp_login hook nem tudja azonnal kiléptetni, és külön session-diagnosztika jelzi, ha a cookie mégsem marad meg. Az updater ettől a verziótól a main ágat használja."
 }
