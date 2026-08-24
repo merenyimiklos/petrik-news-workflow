@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4-test - 2026-08-24
+
+- A vezetői részletező nézetben is megjelenik a **Hír módosítása** gomb, ha a visszaküldött hírt olyan felhasználó nézi, akinek híríró jogosultsága is van (pl. admin tesztfiók).
+- A valódi igazgatóhelyettes/igazgató továbbra sem kap híríró jogosultságot, így a javítás az MK-vezető feladata marad.
+
 ## 1.0.3-test - 2026-08-24
 
 - A javításra visszaküldött híreknél egyértelmű **Módosítás / Hír módosítása** művelet került a felületre.
