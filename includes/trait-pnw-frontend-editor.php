@@ -80,6 +80,8 @@ trait PNW_Frontend_Editor_Trait {
             if ( $preview ) {
                 echo '<a class="pnw-button pnw-button-secondary" target="_blank" rel="noopener" href="' . esc_url( $preview ) . '">Weboldal-előnézet</a>';
             }
+        } elseif ( PNW_Statuses::REVISION === $post->post_status && current_user_can( 'pnw_submit_news' ) && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
+            echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Hír módosítása</a>';
         }
         echo '</div>';
 
@@ -126,7 +128,7 @@ trait PNW_Frontend_Editor_Trait {
         if ( $with_section ) {
             echo '<section class="pnw-section">';
             echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">Részletek</div><h3>' . esc_html( $post->post_title ) . '</h3></div>';
-            if ( PNW_Statuses::REVISION === $post->post_status && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
+            if ( PNW_Statuses::REVISION === $post->post_status && current_user_can( 'pnw_submit_news' ) && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
                 echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Hír módosítása</a>';
             }
             echo '</div>';
