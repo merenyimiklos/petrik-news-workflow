@@ -5,8 +5,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Handles the Hírkezelő login without touching /wp-login.php or /wp-admin.
- * This keeps the frontend login compatible with WPS Hide Login.
+ * Handles the Hírkezelő login on the public manager page.
+ *
+ * We deliberately authenticate against WordPress core credentials and then
+ * create a normal WordPress authentication cookie. This means an MK leader is
+ * genuinely logged in to WordPress, just like an administrator, while
+ * PNW_Access keeps them out of wp-admin and redirects them to the Hírkezelő.
+ *
+ * Using the core username/password checker directly avoids role-based login
+ * blockers from interfering with our custom Petrik roles, while still using
+ * WordPress password hashing and authentication cookies.
  */
 final class PNW_Frontend_Login {
     public static function init(): void {
@@ -40,44 +48,29 @@ final class PNW_Frontend_Login {
             self::redirect_error( 'empty_fields' );
         }
 
-        // Resolve e-mail explicitly so login does not depend on optional auth filters.
-        $user_login = $login;
-        if ( is_email( $login ) ) {
-            $email_user = get_user_by( 'email', $login );
-            if ( $email_user instanceof WP_User ) {
-                $user_login = $email_user->user_login;
-            }
+        $user = is_email( $login )
+            ? get_user_by( 'email', $login )
+            : get_user_by( 'login', $login );
+
+        if ( ! $user instanceof WP_User ) {
+            self::redirect_error( 'invalid_credentials' );
         }
 
-        $user = wp_signon(
-            array(
-                'user_login'    => $user_login,
-                'user_password' => $password,
-                'remember'      => $remember,
-            ),
-            is_ssl()
-        );
-
-        if ( is_wp_error( $user ) ) {
-            $codes = $user->get_error_codes();
-            $credential_errors = array( 'invalid_username', 'invalid_email', 'incorrect_password', 'empty_username', 'empty_password' );
-            if ( array_intersect( $credential_errors, $codes ) ) {
-                self::redirect_error( 'invalid_credentials' );
-            }
-
-            // TEST MODE diagnostics: another authentication hook/plugin rejected
-            // an otherwise normal WordPress login request.
-            self::redirect_error( 'auth_rejected' );
+        // Verify the password using WordPress' own hashing implementation.
+        if ( ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
+            self::redirect_error( 'invalid_credentials' );
         }
 
-        // Role membership is the source of truth for entering the manager.
-        // Capabilities are still checked for individual actions inside it.
+        // Only the Petrik workflow roles and administrators may enter here.
         if ( ! PNW_Roles::has_manager_role( $user ) ) {
-            wp_logout();
             self::redirect_error( 'no_access' );
         }
 
+        // Create a genuine WordPress login session/cookie.
         wp_set_current_user( $user->ID );
+        wp_set_auth_cookie( $user->ID, $remember, is_ssl() );
+        do_action( 'wp_login', $user->user_login, $user );
+
         wp_safe_redirect( PNW_Plugin::manager_url() );
         exit;
     }
