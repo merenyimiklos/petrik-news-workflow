@@ -35,11 +35,14 @@ require_once PNW_DIR . 'includes/class-pnw-roles.php';
 require_once PNW_DIR . 'includes/class-pnw-statuses.php';
 require_once PNW_DIR . 'includes/class-pnw-audit.php';
 require_once PNW_DIR . 'includes/class-pnw-notifications.php';
+require_once PNW_DIR . 'includes/class-pnw-test-mode.php';
 require_once PNW_DIR . 'includes/class-pnw-access.php';
 require_once PNW_DIR . 'includes/class-pnw-actions.php';
 require_once PNW_DIR . 'includes/class-pnw-frontend.php';
 require_once PNW_DIR . 'includes/class-pnw-admin.php';
 require_once PNW_DIR . 'includes/class-pnw-plugin.php';
+
+PNW_Test_Mode::init();
 
 register_activation_hook( __FILE__, array( 'PNW_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'PNW_Plugin', 'deactivate' ) );
