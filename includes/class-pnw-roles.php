@@ -10,6 +10,7 @@ final class PNW_Roles {
     public const DIRECTOR  = 'petrik_director';
 
     public static function init(): void {
+        add_action( 'init', array( __CLASS__, 'keep_role_caps_current' ), 4 );
         add_action( 'init', array( __CLASS__, 'keep_admin_caps_current' ), 5 );
     }
 
@@ -18,10 +19,10 @@ final class PNW_Roles {
             self::MK_LEADER,
             'Munkaközösség-vezető',
             array(
-                'read'              => true,
-                'upload_files'      => true,
-                'edit_posts'        => true,
-                'pnw_submit_news'   => true,
+                'read'            => true,
+                'upload_files'    => true,
+                'edit_posts'      => true,
+                'pnw_submit_news' => true,
             )
         );
 
@@ -29,15 +30,15 @@ final class PNW_Roles {
             self::DEPUTY,
             'Igazgatóhelyettes',
             array(
-                'read'                  => true,
-                'upload_files'          => true,
-                'edit_posts'            => true,
-                'edit_others_posts'     => true,
-                'edit_published_posts'  => true,
-                'publish_posts'         => true,
-                'delete_posts'          => true,
-                'pnw_review_news'       => true,
-                'pnw_view_audit_log'    => true,
+                'read'                 => true,
+                'upload_files'         => true,
+                'edit_posts'           => true,
+                'edit_others_posts'    => true,
+                'edit_published_posts' => true,
+                'publish_posts'        => true,
+                'delete_posts'         => true,
+                'pnw_review_news'      => true,
+                'pnw_view_audit_log'   => true,
             )
         );
 
@@ -45,21 +46,76 @@ final class PNW_Roles {
             self::DIRECTOR,
             'Igazgató',
             array(
-                'read'                  => true,
-                'upload_files'          => true,
-                'edit_posts'            => true,
-                'edit_others_posts'     => true,
-                'edit_published_posts'  => true,
-                'publish_posts'         => true,
-                'delete_posts'          => true,
-                'delete_others_posts'   => true,
-                'pnw_review_news'       => true,
-                'pnw_view_audit_log'    => true,
-                'pnw_manage_workflow'   => true,
+                'read'                 => true,
+                'upload_files'         => true,
+                'edit_posts'           => true,
+                'edit_others_posts'    => true,
+                'edit_published_posts' => true,
+                'publish_posts'        => true,
+                'delete_posts'         => true,
+                'delete_others_posts'  => true,
+                'pnw_review_news'      => true,
+                'pnw_view_audit_log'   => true,
+                'pnw_manage_workflow'  => true,
             )
         );
 
+        self::keep_role_caps_current();
         self::keep_admin_caps_current();
+    }
+
+    /**
+     * add_role() does not update an already existing role. Keep the capabilities
+     * required by this plugin healthy after plugin upgrades as well.
+     */
+    public static function keep_role_caps_current(): void {
+        foreach ( self::role_capabilities() as $role_name => $caps ) {
+            $role = get_role( $role_name );
+            if ( ! $role ) {
+                continue;
+            }
+
+            foreach ( $caps as $cap ) {
+                if ( ! $role->has_cap( $cap ) ) {
+                    $role->add_cap( $cap );
+                }
+            }
+        }
+    }
+
+    private static function role_capabilities(): array {
+        return array(
+            self::MK_LEADER => array(
+                'read',
+                'upload_files',
+                'edit_posts',
+                'pnw_submit_news',
+            ),
+            self::DEPUTY => array(
+                'read',
+                'upload_files',
+                'edit_posts',
+                'edit_others_posts',
+                'edit_published_posts',
+                'publish_posts',
+                'delete_posts',
+                'pnw_review_news',
+                'pnw_view_audit_log',
+            ),
+            self::DIRECTOR => array(
+                'read',
+                'upload_files',
+                'edit_posts',
+                'edit_others_posts',
+                'edit_published_posts',
+                'publish_posts',
+                'delete_posts',
+                'delete_others_posts',
+                'pnw_review_news',
+                'pnw_view_audit_log',
+                'pnw_manage_workflow',
+            ),
+        );
     }
 
     public static function keep_admin_caps_current(): void {
