@@ -35,6 +35,7 @@ trait PNW_Frontend_Shell_Trait {
         }
 
         self::render_header();
+        self::render_test_mode_banner();
         self::render_notice();
 
         $view = isset( $_GET['pnw_view'] ) ? sanitize_key( wp_unslash( $_GET['pnw_view'] ) ) : 'dashboard';
@@ -65,6 +66,9 @@ trait PNW_Frontend_Shell_Trait {
         echo '<section class="pnw-login-card">';
         echo '<div class="pnw-kicker">Petrik</div>';
         echo '<h2>Hírkezelő</h2>';
+        if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
+            echo '<div class="pnw-notice pnw-notice-warning"><strong>TESZTÜZEM.</strong> Ezen a felületen jelenleg egyetlen hír sem publikálható.</div>';
+        }
         echo '<p>A felületet munkaközösség-vezetők, igazgatóhelyettesek és az igazgató használhatják.</p>';
         wp_login_form(
             array(
@@ -106,17 +110,29 @@ trait PNW_Frontend_Shell_Trait {
         echo '</nav>';
     }
 
+    private static function render_test_mode_banner(): void {
+        if ( ! defined( 'PNW_TEST_MODE' ) || ! PNW_TEST_MODE ) {
+            return;
+        }
+
+        echo '<div class="pnw-notice pnw-notice-warning"><strong>TESZT MÓD AKTÍV.</strong> A jóváhagyás csak tesztállapotot rögzít. A plugin által kezelt hírek nem kerülhetnek publikus, privát vagy időzített állapotba.</div>';
+    }
+
     private static function render_notice(): void {
         $key = isset( $_GET['pnw_notice'] ) ? sanitize_key( wp_unslash( $_GET['pnw_notice'] ) ) : '';
         if ( ! $key ) {
             return;
         }
 
+        $approved_message = ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE )
+            ? 'A hír TESZT módban jóváhagyva. Nem lett publikálva.'
+            : 'A hír jóváhagyva és publikálva.';
+
         $messages = array(
             'draft_saved'             => array( 'success', 'A piszkozat mentve.' ),
             'submitted'               => array( 'success', 'A hír jóváhagyásra elküldve.' ),
             'review_saved'            => array( 'success', 'A vezetői módosítások mentve.' ),
-            'approved'                => array( 'success', 'A hír jóváhagyva és publikálva.' ),
+            'approved'                => array( 'success', $approved_message ),
             'rejected'                => array( 'warning', 'A hír javításra visszaküldve.' ),
             'trashed'                 => array( 'success', 'A piszkozat a lomtárba került.' ),
             'missing_fields'          => array( 'error', 'A cím és a hír szövege kötelező.' ),

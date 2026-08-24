@@ -65,6 +65,16 @@ final class PNW_Notifications {
             return;
         }
 
+        if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
+            $subject = sprintf( '[Petrik Hírkezelő][TESZT] Jóváhagyva: %s', wp_strip_all_tags( $post->post_title ) );
+            $body    = "A hírt a vezetőség TESZT módban jóváhagyta.\n\n";
+            $body   .= "A hír NEM lett publikálva és nem jelenik meg a Petrik nyilvános oldalán.\n\n";
+            $body   .= 'Cím: ' . wp_strip_all_tags( $post->post_title ) . "\n";
+            $body   .= 'Hírkezelő: ' . PNW_Plugin::manager_url() . "\n";
+            wp_mail( $author->user_email, $subject, $body );
+            return;
+        }
+
         $subject = sprintf( '[Petrik Hírkezelő] Publikálva: %s', wp_strip_all_tags( $post->post_title ) );
         $body    = "A hírt a vezetőség jóváhagyta és publikálta.\n\n";
         $body   .= 'Cím: ' . wp_strip_all_tags( $post->post_title ) . "\n";
