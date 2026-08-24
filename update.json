@@ -1,8 +1,8 @@
 {
-  "version": "1.0.11-test",
+  "version": "1.0.12-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "MK-vezető login session javítás: a sikeres jelszóellenőrzés után a WordPress auth cookie újra létrejön, a külső role-based wp_login hook nem tudja azonnal kiléptetni, és külön session-diagnosztika jelzi, ha a cookie mégsem marad meg. Az updater ettől a verziótól a main ágat használja."
+  "changelog": "Hírkezelő cache-javítás: a belső navigáció többé nem a csupasz /hirkezelo/ URL-t használja, hanem session-specifikus cache-bustert kap. A Hírkezelő válaszai private/no-store/no-cache és Vary: Cookie védelemmel mennek, így a WP Fastest Cache nem tud kijelentkezett login-oldalt visszaadni egy aktív MK-munkamenet helyett."
 }
