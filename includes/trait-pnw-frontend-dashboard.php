@@ -35,7 +35,7 @@ trait PNW_Frontend_Dashboard_Trait {
                 'meta_key'       => '_pnw_managed',
                 'meta_value'     => '1',
                 'author'         => $user_id,
-                'post_status'    => array( 'draft', 'pending', PNW_Statuses::REVISION, 'publish', 'future' ),
+                'post_status'    => array( 'draft', 'pending', PNW_Statuses::REVISION, 'publish', 'future', PNW_Statuses::TEST_APPROVED ),
                 'posts_per_page' => 50,
                 'orderby'        => 'modified',
                 'order'          => 'DESC',
@@ -78,7 +78,7 @@ trait PNW_Frontend_Dashboard_Trait {
                 'post_type'      => 'post',
                 'meta_key'       => '_pnw_managed',
                 'meta_value'     => '1',
-                'post_status'    => array( 'publish', PNW_Statuses::REVISION ),
+                'post_status'    => array( 'publish', PNW_Statuses::REVISION, PNW_Statuses::TEST_APPROVED ),
                 'posts_per_page' => 10,
                 'orderby'        => 'modified',
                 'order'          => 'DESC',
@@ -121,7 +121,10 @@ trait PNW_Frontend_Dashboard_Trait {
             if ( $reviewer && 'pending' === $status ) {
                 echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'review', 'post_id' => $post->ID ) ) ) . '">Ellenőrzés</a>';
             } elseif ( ! $reviewer && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
-                echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Szerkesztés</a>';
+                $label = PNW_Statuses::REVISION === $status ? 'Módosítás' : 'Szerkesztés';
+                echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">' . esc_html( $label ) . '</a>';
+            } elseif ( PNW_Statuses::REVISION === $status && (int) $post->post_author === get_current_user_id() && current_user_can( 'pnw_submit_news' ) ) {
+                echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Módosítás</a>';
             } elseif ( 'publish' === $status ) {
                 echo '<a class="pnw-button pnw-button-secondary pnw-button-small" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás</a>';
             } elseif ( PNW_Access::can_view_workflow_post( (int) $post->ID ) ) {
