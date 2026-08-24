@@ -43,11 +43,9 @@ final class PNW_Roles {
      * add_role() does not update an already existing role. Keep the capabilities
      * required by this plugin healthy after plugin upgrades as well.
      *
-     * level_0 / level_1 are legacy WordPress capabilities. Core WordPress does
-     * not require them for authentication, but older themes/plugins may still
-     * use the derived user_level value to decide whether a user may log in.
-     * Giving our custom roles a minimal Contributor-like legacy level avoids
-     * those compatibility problems without granting administrator access.
+     * The MK leader intentionally has a normal Contributor-compatible WordPress
+     * base capability set, plus media upload and the Petrik submission cap. It
+     * does NOT get publish_posts, edit_others_posts or administrator rights.
      */
     public static function keep_role_caps_current(): void {
         foreach ( self::role_capabilities() as $role_name => $caps ) {
@@ -67,11 +65,15 @@ final class PNW_Roles {
     private static function role_capabilities(): array {
         return array(
             self::MK_LEADER => array(
+                // Normal WordPress Contributor-compatible login/base rights.
                 'read'            => true,
                 'level_0'         => true,
                 'level_1'         => true,
-                'upload_files'    => true,
                 'edit_posts'      => true,
+                'delete_posts'    => true,
+
+                // Needed by the frontend news editor.
+                'upload_files'    => true,
                 'pnw_submit_news' => true,
             ),
             self::DEPUTY => array(
@@ -108,11 +110,9 @@ final class PNW_Roles {
     /**
      * When capabilities are added to an already existing role, WordPress does
      * not automatically recalculate the persisted wp_user_level value of users
-     * who already had that role. Repair it once it is below our minimal level.
+     * who already had that role. Keep it aligned with the role capabilities.
      */
     public static function repair_custom_role_user_levels(): void {
-        global $wpdb;
-
         foreach ( array( self::MK_LEADER, self::DEPUTY, self::DIRECTOR ) as $role_name ) {
             $user_ids = get_users(
                 array(
@@ -122,15 +122,7 @@ final class PNW_Roles {
             );
 
             foreach ( $user_ids as $user_id ) {
-                $user_id   = (int) $user_id;
-                $meta_key  = $wpdb->get_blog_prefix() . 'user_level';
-                $old_level = (int) get_user_meta( $user_id, $meta_key, true );
-
-                if ( $old_level >= 1 ) {
-                    continue;
-                }
-
-                $user = new WP_User( $user_id );
+                $user = new WP_User( (int) $user_id );
                 $user->update_user_level_from_caps();
             }
         }
