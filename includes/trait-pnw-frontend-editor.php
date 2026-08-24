@@ -89,11 +89,17 @@ trait PNW_Frontend_Editor_Trait {
         echo '<div class="pnw-form-actions"><button class="pnw-button pnw-button-secondary" type="submit">Vezetői módosítások mentése</button></div>';
         echo '</form>';
 
+        $test_mode = defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE;
+        $approve_description = $test_mode
+            ? 'TESZT módban a jóváhagyás rögzül, de a hír nem jelenik meg a nyilvános weboldalon.'
+            : 'A hír azonnal megjelenik a weboldalon.';
+        $approve_label = $test_mode ? '✓ Teszt jóváhagyás – NEM publikál' : '✓ Jóváhagyás és publikálás';
+
         echo '<div class="pnw-decision-grid">';
         echo '<form class="pnw-decision pnw-decision-approve" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
         echo '<input type="hidden" name="action" value="pnw_review_news"><input type="hidden" name="post_id" value="' . esc_attr( (string) $post_id ) . '"><input type="hidden" name="decision" value="approve">';
         wp_nonce_field( 'pnw_review_news', 'pnw_nonce' );
-        echo '<h4>Jóváhagyás</h4><p>A hír azonnal megjelenik a weboldalon.</p><textarea name="review_note" rows="3" placeholder="Opcionális belső megjegyzés"></textarea><button class="pnw-button pnw-button-success" type="submit">✓ Jóváhagyás és publikálás</button></form>';
+        echo '<h4>Jóváhagyás</h4><p>' . esc_html( $approve_description ) . '</p><textarea name="review_note" rows="3" placeholder="Opcionális belső megjegyzés"></textarea><button class="pnw-button pnw-button-success" type="submit">' . esc_html( $approve_label ) . '</button></form>';
 
         echo '<form class="pnw-decision pnw-decision-reject" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
         echo '<input type="hidden" name="action" value="pnw_review_news"><input type="hidden" name="post_id" value="' . esc_attr( (string) $post_id ) . '"><input type="hidden" name="decision" value="reject">';
