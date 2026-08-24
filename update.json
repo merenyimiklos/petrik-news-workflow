@@ -1,8 +1,8 @@
 {
-  "version": "1.0.13-test",
+  "version": "1.0.14-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Új Kint lévő hírek felület: igazgatóhelyettes, igazgató és webadmin számára listázza a jelenlegi publikus WordPress-híreket, beleértve a régi, workflow előtti bejegyzéseket is. Production módban szerkeszthetők és Lomtárba helyezhetők; TEST MODE-ban a valódi éles tartalom csak megtekinthető, módosítás/törlés blokkolva van."
+  "changelog": "Kint lévő hírek design-javítás: a műveletgombok külön, szélesebb oszlopban jelennek meg, nem vágódnak le; a táblázat oszlopai kiegyensúlyozottabbak, a kereső rendezettebb, a forrásjelvény olvashatóbb, mobilon pedig kártyás elrendezésre vált."
 }
