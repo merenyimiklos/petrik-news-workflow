@@ -66,7 +66,11 @@ final class PNW_Statuses {
     }
 
     public static function css_class( string $status ): string {
-        $allowed = array( 'draft', 'pending', self::REVISION, self::TEST_APPROVED, 'publish', 'future' );
+        if ( self::TEST_APPROVED === $status ) {
+            return 'pending';
+        }
+
+        $allowed = array( 'draft', 'pending', self::REVISION, 'publish', 'future' );
         return in_array( $status, $allowed, true ) ? $status : 'other';
     }
 }
