@@ -59,10 +59,20 @@ final class PNW_Frontend_Login {
         );
 
         if ( is_wp_error( $user ) ) {
-            self::redirect_error( 'invalid_credentials' );
+            $codes = $user->get_error_codes();
+            $credential_errors = array( 'invalid_username', 'invalid_email', 'incorrect_password', 'empty_username', 'empty_password' );
+            if ( array_intersect( $credential_errors, $codes ) ) {
+                self::redirect_error( 'invalid_credentials' );
+            }
+
+            // TEST MODE diagnostics: another authentication hook/plugin rejected
+            // an otherwise normal WordPress login request.
+            self::redirect_error( 'auth_rejected' );
         }
 
-        if ( ! user_can( $user, 'pnw_submit_news' ) && ! user_can( $user, 'pnw_review_news' ) ) {
+        // Role membership is the source of truth for entering the manager.
+        // Capabilities are still checked for individual actions inside it.
+        if ( ! PNW_Roles::has_manager_role( $user ) ) {
             wp_logout();
             self::redirect_error( 'no_access' );
         }
