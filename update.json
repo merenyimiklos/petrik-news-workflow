@@ -1,0 +1,8 @@
+{
+  "version": "1.0.9-test",
+  "requires": "6.4",
+  "requires_php": "7.4",
+  "tested": "6.8.8",
+  "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/agent/initial-wordpress-workflow.zip",
+  "changelog": "GitHub-alapú natív WordPress frissítés. Ettől a verziótól a további Petrik News Workflow frissítések kézi ZIP-feltöltés nélkül jelennek meg a WordPress Bővítmények oldalán."
+}
