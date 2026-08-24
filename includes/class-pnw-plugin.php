@@ -25,6 +25,12 @@ final class PNW_Plugin {
         PNW_Frontend::init();
         PNW_Admin::init();
 
+        // The Hírkezelő is user-specific and must never be served from a public
+        // full-page cache. Query-string cache busting in manager_url() protects
+        // against caches that run before normal WordPress plugin hooks; these
+        // response headers protect the normal WordPress response as well.
+        add_action( 'template_redirect', array( __CLASS__, 'protect_manager_cache' ), 0 );
+
         if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
             add_filter( 'wp_nav_menu_objects', array( __CLASS__, 'hide_manager_page_from_menu' ), 999, 2 );
         }
@@ -78,6 +84,25 @@ final class PNW_Plugin {
         return (int) $page_id;
     }
 
+    public static function protect_manager_cache(): void {
+        $page_id = absint( get_option( 'pnw_manager_page_id', 0 ) );
+        if ( ! $page_id || ! is_page( $page_id ) ) {
+            return;
+        }
+
+        if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+            define( 'DONOTCACHEPAGE', true );
+        }
+
+        nocache_headers();
+
+        if ( ! headers_sent() ) {
+            header( 'Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0', true );
+            header( 'Pragma: no-cache', true );
+            header( 'Vary: Cookie', false );
+        }
+    }
+
     public static function hide_manager_page_from_menu( array $items, $args ): array {
         $page_id = absint( get_option( 'pnw_manager_page_id', 0 ) );
         if ( ! $page_id ) {
@@ -125,9 +150,19 @@ final class PNW_Plugin {
         $page_id = absint( get_option( 'pnw_manager_page_id', 0 ) );
         $url     = $page_id ? get_permalink( $page_id ) : home_url( '/hirkezelo/' );
 
-        if ( ! empty( $args ) ) {
-            $url = add_query_arg( $args, $url );
+        // Never navigate an authenticated workflow user to the bare public
+        // /hirkezelo/ URL. That URL may have been cached earlier while logged
+        // out. The nonce is only a cache-buster (not an authorization check),
+        // and it is different for each logged-in WordPress session.
+        $cache_args = array(
+            'pnw_app' => PNW_VERSION,
+        );
+
+        if ( is_user_logged_in() ) {
+            $cache_args['pnw_session'] = wp_create_nonce( 'pnw_manager_cache_' . get_current_user_id() );
         }
+
+        $url = add_query_arg( array_merge( $cache_args, $args ), $url );
 
         return $url;
     }
