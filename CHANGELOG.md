@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.6-test - 2026-08-24
+
+- A Hírkezelő bejelentkezése teljesen frontend útvonalon történik; kijelentkezett felhasználónál sem használ `/wp-admin/admin-post.php` címet.
+- A munkaközösség-vezetői szerepkör szükséges capability-jeit a plugin automatikusan helyreállítja frissítés után is.
+- A vezetői/admin dashboard külön **Saját piszkozatok és javítások** blokkban mutatja a saját elmentett piszkozatokat.
+- Az e-mailes bejelentkezés explicit felhasználónév-feloldást használ.
+
 ## 1.0.5-test - 2026-08-24
 
 - A Hírkezelő saját frontend bejelentkezési végpontot kapott, így nem függ a `wp-login.php` URL-től és kompatibilis a WPS Hide Login használatával.
