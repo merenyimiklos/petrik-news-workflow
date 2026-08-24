@@ -28,7 +28,7 @@ trait PNW_Frontend_Shell_Trait {
             return (string) ob_get_clean();
         }
 
-        if ( ! current_user_can( 'pnw_submit_news' ) && ! current_user_can( 'pnw_review_news' ) ) {
+        if ( ! current_user_can( 'pnw_submit_news' ) && ! current_user_can( 'pnw_review_news' ) && ! current_user_can( 'pnw_manage_published_news' ) ) {
             self::render_unauthorized();
             echo '</div>';
             return (string) ob_get_clean();
@@ -49,6 +49,12 @@ trait PNW_Frontend_Shell_Trait {
                 break;
             case 'review':
                 self::render_review( isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0 );
+                break;
+            case 'published':
+                self::render_published_news();
+                break;
+            case 'published_edit':
+                self::render_published_editor( isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0 );
                 break;
             case 'audit':
                 self::render_audit();
@@ -120,6 +126,9 @@ trait PNW_Frontend_Shell_Trait {
         if ( current_user_can( 'pnw_submit_news' ) ) {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a>';
         }
+        if ( current_user_can( 'pnw_manage_published_news' ) ) {
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published' ) ) ) . '">Kint lévő hírek</a>';
+        }
         if ( current_user_can( 'pnw_view_audit_log' ) ) {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) ) . '">Napló</a>';
         }
@@ -152,6 +161,9 @@ trait PNW_Frontend_Shell_Trait {
             'approved'                => array( 'success', $approved_message ),
             'rejected'                => array( 'warning', 'A hír javításra visszaküldve.' ),
             'trashed'                 => array( 'success', 'A piszkozat a lomtárba került.' ),
+            'published_updated'       => array( 'success', 'A publikált hír módosításai elmentve.' ),
+            'published_trashed'       => array( 'success', 'A publikált hír a Lomtárba került és lekerült a weboldalról.' ),
+            'production_only'         => array( 'warning', 'A meglévő publikus hírek módosítása és törlése TEST MODE-ban biztonsági okból le van tiltva.' ),
             'missing_fields'          => array( 'error', 'A cím és a hír szövege kötelező.' ),
             'category_required'       => array( 'error', 'Legalább egy kategóriát válassz.' ),
             'rejection_note_required' => array( 'error', 'Visszaküldésnél kötelező megjegyzést írni.' ),
