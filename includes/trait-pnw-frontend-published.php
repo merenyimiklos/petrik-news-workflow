@@ -12,11 +12,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * maintained from the same frontend manager after production launch.
  */
 trait PNW_Frontend_Published_Trait {
+    private static function enqueue_published_assets(): void {
+        wp_enqueue_style(
+            'pnw-published',
+            PNW_URL . 'assets/css/pnw-published.css',
+            array( 'pnw-app' ),
+            PNW_VERSION
+        );
+    }
+
     private static function render_published_news(): void {
         if ( ! current_user_can( 'pnw_manage_published_news' ) ) {
             self::render_unauthorized();
             return;
         }
+
+        self::enqueue_published_assets();
 
         $search = isset( $_GET['pnw_q'] ) ? sanitize_text_field( wp_unslash( $_GET['pnw_q'] ) ) : '';
         $paged  = isset( $_GET['pnw_page'] ) ? max( 1, absint( $_GET['pnw_page'] ) ) : 1;
@@ -44,9 +55,9 @@ trait PNW_Frontend_Published_Trait {
             echo '<div class="pnw-notice pnw-notice-warning"><strong>TESZT MÓD:</strong> a jelenlegi éles hírek megtekinthetők, de szerkesztésük és törlésük blokkolva van a production indulásig.</div>';
         }
 
-        echo '<form class="pnw-form" method="get" action="' . esc_url( PNW_Plugin::manager_url() ) . '" style="margin-bottom:18px">';
+        echo '<form class="pnw-form pnw-published-search-card" method="get" action="' . esc_url( PNW_Plugin::manager_url() ) . '">';
         echo '<input type="hidden" name="pnw_view" value="published">';
-        echo '<div class="pnw-field"><label for="pnw-published-search">Keresés a publikált hírek között</label><div style="display:flex;gap:10px;align-items:center"><input id="pnw-published-search" type="search" name="pnw_q" value="' . esc_attr( $search ) . '" placeholder="Hír címe vagy szövege"><button class="pnw-button pnw-button-secondary" type="submit">Keresés</button></div></div>';
+        echo '<div class="pnw-field" style="margin-bottom:0"><label for="pnw-published-search">Keresés a publikált hírek között</label><div class="pnw-published-search-row"><input id="pnw-published-search" type="search" name="pnw_q" value="' . esc_attr( $search ) . '" placeholder="Hír címe vagy szövege"><button class="pnw-button pnw-button-secondary" type="submit">Keresés</button></div></div>';
         echo '</form>';
 
         if ( ! $query->have_posts() ) {
@@ -56,25 +67,25 @@ trait PNW_Frontend_Published_Trait {
             return;
         }
 
-        echo '<div class="pnw-table-card"><div class="pnw-table-wrap"><table class="pnw-table"><thead><tr><th>Hír</th><th>Szerző</th><th>Publikálva</th><th>Forrás</th><th></th></tr></thead><tbody>';
+        echo '<div class="pnw-table-card pnw-published-card"><div class="pnw-table-wrap"><table class="pnw-table pnw-published-table"><thead><tr><th>Hír</th><th>Szerző</th><th>Publikálva</th><th>Forrás</th><th>Műveletek</th></tr></thead><tbody>';
         foreach ( $query->posts as $post ) {
             $author  = get_userdata( (int) $post->post_author );
             $managed = '1' === (string) get_post_meta( $post->ID, '_pnw_managed', true );
 
             echo '<tr>';
-            echo '<td><strong>' . esc_html( $post->post_title ?: '(Névtelen hír)' ) . '</strong><small>' . esc_html( self::category_names( (int) $post->ID ) ) . '</small></td>';
-            echo '<td>' . esc_html( $author ? $author->display_name : '—' ) . '</td>';
-            echo '<td>' . esc_html( get_the_date( 'Y.m.d. H:i', $post ) ) . '</td>';
-            echo '<td><span class="pnw-badge">' . esc_html( $managed ? 'Hírkezelő' : 'Korábbi WordPress hír' ) . '</span></td>';
-            echo '<td class="pnw-actions">';
-            echo '<a class="pnw-button pnw-button-secondary pnw-button-small" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás</a>';
-            echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published_edit', 'post_id' => $post->ID ) ) ) . '">' . esc_html( $test_mode ? 'Részletek' : 'Szerkesztés' ) . '</a>';
-            echo '</td></tr>';
+            echo '<td data-label="Hír"><strong class="pnw-published-title">' . esc_html( $post->post_title ?: '(Névtelen hír)' ) . '</strong><small class="pnw-published-meta">' . esc_html( self::category_names( (int) $post->ID ) ) . '</small></td>';
+            echo '<td data-label="Szerző">' . esc_html( $author ? $author->display_name : '—' ) . '</td>';
+            echo '<td data-label="Publikálva"><time datetime="' . esc_attr( get_the_date( DATE_W3C, $post ) ) . '">' . esc_html( get_the_date( 'Y.m.d. H:i', $post ) ) . '</time></td>';
+            echo '<td data-label="Forrás"><span class="pnw-published-source">' . esc_html( $managed ? 'Hírkezelő' : 'Korábbi WordPress hír' ) . '</span></td>';
+            echo '<td data-label="Műveletek" class="pnw-published-actions-cell"><div class="pnw-published-actions">';
+            echo '<a class="pnw-button pnw-button-secondary" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás</a>';
+            echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published_edit', 'post_id' => $post->ID ) ) ) . '">' . esc_html( $test_mode ? 'Részletek' : 'Szerkesztés' ) . '</a>';
+            echo '</div></td></tr>';
         }
         echo '</tbody></table></div></div>';
 
         if ( $query->max_num_pages > 1 ) {
-            echo '<div class="pnw-form-actions" style="justify-content:center;margin-top:18px">';
+            echo '<div class="pnw-published-pagination">';
             if ( $paged > 1 ) {
                 $prev_args = array( 'pnw_view' => 'published', 'pnw_page' => $paged - 1 );
                 if ( '' !== $search ) {
@@ -82,7 +93,7 @@ trait PNW_Frontend_Published_Trait {
                 }
                 echo '<a class="pnw-button pnw-button-secondary" href="' . esc_url( PNW_Plugin::manager_url( $prev_args ) ) . '">← Előző</a>';
             }
-            echo '<span style="align-self:center">' . esc_html( (string) $paged ) . ' / ' . esc_html( (string) $query->max_num_pages ) . ' oldal</span>';
+            echo '<span>' . esc_html( (string) $paged ) . ' / ' . esc_html( (string) $query->max_num_pages ) . ' oldal</span>';
             if ( $paged < (int) $query->max_num_pages ) {
                 $next_args = array( 'pnw_view' => 'published', 'pnw_page' => $paged + 1 );
                 if ( '' !== $search ) {
@@ -103,6 +114,8 @@ trait PNW_Frontend_Published_Trait {
             return;
         }
 
+        self::enqueue_published_assets();
+
         $post = get_post( $post_id );
         if ( ! $post || 'post' !== $post->post_type || 'publish' !== $post->post_status ) {
             echo '<div class="pnw-notice pnw-notice-error">Ez a publikált hír nem található.</div>';
@@ -113,7 +126,7 @@ trait PNW_Frontend_Published_Trait {
         $managed   = '1' === (string) get_post_meta( $post_id, '_pnw_managed', true );
 
         echo '<section class="pnw-section">';
-        echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">Publikált hír</div><h3>' . esc_html( $post->post_title ) . '</h3><p>' . esc_html( $managed ? 'Hírkezelőből publikált hír' : 'Korábbi WordPress hír' ) . '</p></div><a class="pnw-button pnw-button-secondary" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás a weboldalon</a></div>';
+        echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">Publikált hír</div><h3>' . esc_html( $post->post_title ) . '</h3><p>' . esc_html( $managed ? 'Hírkezelőből publikált hír' : 'Korábbi WordPress hír' ) . '</p></div><a class="pnw-button pnw-button-secondary pnw-published-editor-back" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás a weboldalon</a></div>';
 
         if ( $test_mode ) {
             echo '<div class="pnw-notice pnw-notice-warning"><strong>TESZT MÓD:</strong> ez valódi, jelenleg publikus tartalom. A production indulásig ezen a felületen csak megtekinthető, nem módosítható és nem törölhető.</div>';
