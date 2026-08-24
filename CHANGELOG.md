@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.8-test - 2026-08-25
+
+- Az MK-vezető belépése most valódi WordPress munkamenetet hoz létre (`wp_set_auth_cookie`), ugyanúgy, mint egy normál WordPress belépés.
+- A hitelesítés a WordPress saját jelszóhash-ellenőrzését használja, de nem engedi, hogy egy külső role-based login filter blokkolja a Petrik saját szerepköreit.
+- A munkaközösség-vezető szerepkör Contributor-kompatibilis alapjogokat kap (`read`, `edit_posts`, `delete_posts`, `level_0`, `level_1`) + képfeltöltés + `pnw_submit_news`.
+- Az MK-vezető továbbra sem kap `publish_posts`, `edit_others_posts`, adminisztrátori vagy workflow-jóváhagyási jogot.
+- Sikeres WordPress belépés után az MK-vezetőt a plugin továbbra is automatikusan a Hírkezelőbe irányítja, a `/wp-admin` felület helyett.
+
 ## 1.0.6-test - 2026-08-24
 
 - A Hírkezelő bejelentkezése teljesen frontend útvonalon történik; kijelentkezett felhasználónál sem használ `/wp-admin/admin-post.php` címet.
