@@ -1,8 +1,8 @@
 {
-  "version": "1.0.12-test",
+  "version": "1.0.13-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Hírkezelő cache-javítás: a belső navigáció többé nem a csupasz /hirkezelo/ URL-t használja, hanem session-specifikus cache-bustert kap. A Hírkezelő válaszai private/no-store/no-cache és Vary: Cookie védelemmel mennek, így a WP Fastest Cache nem tud kijelentkezett login-oldalt visszaadni egy aktív MK-munkamenet helyett."
+  "changelog": "Új Kint lévő hírek felület: igazgatóhelyettes, igazgató és webadmin számára listázza a jelenlegi publikus WordPress-híreket, beleértve a régi, workflow előtti bejegyzéseket is. Production módban szerkeszthetők és Lomtárba helyezhetők; TEST MODE-ban a valódi éles tartalom csak megtekinthető, módosítás/törlés blokkolva van."
 }
