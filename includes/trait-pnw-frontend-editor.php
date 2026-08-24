@@ -17,28 +17,37 @@ trait PNW_Frontend_Editor_Trait {
             return;
         }
 
-        $selected = $post ? wp_get_post_categories( $post_id ) : array();
-        $note     = $post ? (string) get_post_meta( $post_id, '_pnw_review_note', true ) : '';
+        $selected    = $post ? wp_get_post_categories( $post_id ) : array();
+        $note        = $post ? (string) get_post_meta( $post_id, '_pnw_review_note', true ) : '';
+        $is_revision = $post && PNW_Statuses::REVISION === $post->post_status;
 
         echo '<section class="pnw-section">';
-        echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">' . ( $post ? 'Szerkesztés' : 'Új tartalom' ) . '</div><h3>' . ( $post ? esc_html( $post->post_title ) : 'Új hír beküldése' ) . '</h3></div></div>';
+        echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">' . ( $is_revision ? 'Javítás' : ( $post ? 'Szerkesztés' : 'Új tartalom' ) ) . '</div><h3>' . ( $post ? esc_html( $post->post_title ) : 'Új hír beküldése' ) . '</h3></div></div>';
 
         if ( $note ) {
             echo '<div class="pnw-review-note"><strong>Vezetői megjegyzés</strong><p>' . nl2br( esc_html( $note ) ) . '</p></div>';
         }
 
-        echo '<form class="pnw-form" method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+        if ( $is_revision ) {
+            echo '<div class="pnw-notice pnw-notice-warning pnw-inline-notice">Módosítsd a kért részeket, nézd meg az előnézetet, majd küldd vissza újra jóváhagyásra.</div>';
+        }
+
+        echo '<form class="pnw-form pnw-editor-form" method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
         echo '<input type="hidden" name="action" value="pnw_save_news">';
         echo '<input type="hidden" name="post_id" value="' . esc_attr( (string) $post_id ) . '">';
         wp_nonce_field( 'pnw_save_news', 'pnw_nonce' );
 
         self::render_common_fields( $post, PNW_Access::allowed_category_ids(), $selected, 'pnw_author_editor' );
 
-        echo '<div class="pnw-form-actions">';
+        echo '<div class="pnw-form-actions pnw-form-actions-spread">';
+        echo '<button class="pnw-button pnw-button-preview pnw-preview-trigger" type="button">Előnézet</button>';
+        echo '<div class="pnw-form-actions-main">';
         echo '<button class="pnw-button pnw-button-secondary" type="submit" name="pnw_command" value="draft">Piszkozat mentése</button>';
-        echo '<button class="pnw-button" type="submit" name="pnw_command" value="submit">Beküldés jóváhagyásra</button>';
-        echo '</div>';
+        echo '<button class="pnw-button" type="submit" name="pnw_command" value="submit">' . esc_html( $is_revision ? 'Újraküldés jóváhagyásra' : 'Beküldés jóváhagyásra' ) . '</button>';
+        echo '</div></div>';
         echo '</form>';
+
+        self::render_preview_modal();
 
         if ( $post ) {
             echo '<form class="pnw-delete-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" data-confirm="Biztosan a lomtárba helyezed ezt a piszkozatot?">';
@@ -69,8 +78,10 @@ trait PNW_Frontend_Editor_Trait {
         if ( 'pending' === $post->post_status ) {
             $preview = get_preview_post_link( $post );
             if ( $preview ) {
-                echo '<a class="pnw-button pnw-button-secondary" target="_blank" rel="noopener" href="' . esc_url( $preview ) . '">Előnézet</a>';
+                echo '<a class="pnw-button pnw-button-secondary" target="_blank" rel="noopener" href="' . esc_url( $preview ) . '">Weboldal-előnézet</a>';
             }
+        } elseif ( PNW_Statuses::REVISION === $post->post_status && current_user_can( 'pnw_submit_news' ) && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
+            echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Hír módosítása</a>';
         }
         echo '</div>';
 
@@ -82,12 +93,14 @@ trait PNW_Frontend_Editor_Trait {
             return;
         }
 
-        echo '<form class="pnw-form" method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+        echo '<form class="pnw-form pnw-editor-form" method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
         echo '<input type="hidden" name="action" value="pnw_reviewer_save"><input type="hidden" name="post_id" value="' . esc_attr( (string) $post_id ) . '">';
         wp_nonce_field( 'pnw_reviewer_save', 'pnw_nonce' );
         self::render_common_fields( $post, array(), $selected, 'pnw_reviewer_editor', true );
-        echo '<div class="pnw-form-actions"><button class="pnw-button pnw-button-secondary" type="submit">Vezetői módosítások mentése</button></div>';
+        echo '<div class="pnw-form-actions pnw-form-actions-spread"><button class="pnw-button pnw-button-preview pnw-preview-trigger" type="button">Előnézet</button><div class="pnw-form-actions-main"><button class="pnw-button pnw-button-secondary" type="submit">Vezetői módosítások mentése</button></div></div>';
         echo '</form>';
+
+        self::render_preview_modal();
 
         $test_mode = defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE;
         $approve_description = $test_mode
@@ -114,7 +127,11 @@ trait PNW_Frontend_Editor_Trait {
     private static function render_readonly_details( WP_Post $post, bool $with_section = true ): void {
         if ( $with_section ) {
             echo '<section class="pnw-section">';
-            echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">Részletek</div><h3>' . esc_html( $post->post_title ) . '</h3></div></div>';
+            echo '<div class="pnw-section-heading"><div><div class="pnw-kicker">Részletek</div><h3>' . esc_html( $post->post_title ) . '</h3></div>';
+            if ( PNW_Statuses::REVISION === $post->post_status && current_user_can( 'pnw_submit_news' ) && PNW_Access::can_edit_workflow_post( (int) $post->ID ) ) {
+                echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Hír módosítása</a>';
+            }
+            echo '</div>';
         }
 
         $note = (string) get_post_meta( $post->ID, '_pnw_review_note', true );
@@ -139,16 +156,24 @@ trait PNW_Frontend_Editor_Trait {
         $excerpt = $post ? $post->post_excerpt : '';
 
         echo '<div class="pnw-field"><label for="pnw-title">Cím <span>*</span></label><input id="pnw-title" type="text" name="post_title" required maxlength="200" value="' . esc_attr( $title ) . '" placeholder="A hír címe"></div>';
-        echo '<div class="pnw-field"><label>Hír szövege <span>*</span></label>';
+        echo '<div class="pnw-field pnw-editor-field"><div class="pnw-field-heading"><label>Hír szövege <span>*</span></label><small>Vizuális szerkesztő – HTML-kódot nem kell használnod.</small></div>';
         wp_editor(
             $content,
             $editor_id,
             array(
-                'textarea_name' => 'post_content',
-                'textarea_rows' => 14,
-                'media_buttons' => true,
-                'teeny'         => false,
-                'quicktags'     => true,
+                'textarea_name'    => 'post_content',
+                'textarea_rows'    => 16,
+                'editor_height'    => 390,
+                'media_buttons'    => true,
+                'drag_drop_upload' => true,
+                'teeny'            => false,
+                'quicktags'        => false,
+                'tinymce'          => array(
+                    'menubar'  => false,
+                    'statusbar' => false,
+                    'toolbar1' => 'formatselect,bold,italic,bullist,numlist,blockquote,alignleft,aligncenter,alignright,link,unlink,undo,redo,removeformat,fullscreen',
+                    'toolbar2' => '',
+                ),
             )
         );
         echo '</div>';
@@ -166,10 +191,36 @@ trait PNW_Frontend_Editor_Trait {
         }
         echo '</div></fieldset>';
 
-        echo '<div class="pnw-field"><label for="pnw-featured">Kiemelt kép</label>';
+        $current_image = '';
         if ( $post && has_post_thumbnail( $post ) ) {
-            echo '<div class="pnw-current-image">' . get_the_post_thumbnail( $post, 'medium' ) . '<span>Jelenlegi kiemelt kép</span></div>';
+            $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post ), 'large' );
+            $current_image = $image ? (string) $image[0] : '';
         }
-        echo '<input id="pnw-featured" type="file" name="featured_image" accept="image/*"><small>Új kép feltöltésével a jelenlegi kiemelt kép lecserélődik. A WordPress feltöltési méretkorlátja érvényes.</small></div>';
+
+        echo '<div class="pnw-field pnw-image-field"><label for="pnw-featured">Kiemelt kép</label>';
+        echo '<div class="pnw-image-live" data-current-src="' . esc_url( $current_image ) . '">';
+        if ( $current_image ) {
+            echo '<img src="' . esc_url( $current_image ) . '" alt="Kiemelt kép előnézete"><div class="pnw-image-live-meta"><strong>Kiemelt kép</strong><span>Új fájl kiválasztásakor itt azonnal látod a cserét.</span></div>';
+        } else {
+            echo '<div class="pnw-image-placeholder"><strong>Nincs még kiemelt kép</strong><span>A kiválasztott kép előnézete itt jelenik meg.</span></div>';
+        }
+        echo '</div>';
+        echo '<input id="pnw-featured" class="pnw-featured-input" type="file" name="featured_image" accept="image/jpeg,image/png,image/webp,image/gif"><small>JPG, PNG, WebP vagy GIF. Új kép feltöltésével a jelenlegi kiemelt kép lecserélődik.</small></div>';
+    }
+
+    private static function render_preview_modal(): void {
+        echo '<div class="pnw-preview-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pnw-preview-title">';
+        echo '<div class="pnw-preview-backdrop" data-pnw-preview-close></div>';
+        echo '<div class="pnw-preview-dialog">';
+        echo '<div class="pnw-preview-toolbar"><div><div class="pnw-kicker">Gyors előnézet</div><strong>Így áll most össze a hír</strong></div><button type="button" class="pnw-preview-close" data-pnw-preview-close aria-label="Előnézet bezárása">×</button></div>';
+        echo '<div class="pnw-preview-hint">Ez szerkesztés közbeni gyors előnézet. A végleges publikus megjelenést a Petrik Divi sablonja adja.</div>';
+        echo '<article class="pnw-preview-article">';
+        echo '<div class="pnw-preview-image-wrap" hidden><img class="pnw-preview-image" alt="Kiemelt kép előnézete"></div>';
+        echo '<div class="pnw-preview-meta"></div>';
+        echo '<h1 id="pnw-preview-title" class="pnw-preview-title">Hír címe</h1>';
+        echo '<p class="pnw-preview-excerpt" hidden></p>';
+        echo '<div class="pnw-preview-content"></div>';
+        echo '</article>';
+        echo '</div></div>';
     }
 }

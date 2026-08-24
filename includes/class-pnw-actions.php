@@ -6,10 +6,49 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class PNW_Actions {
     public static function init(): void {
+        add_action( 'admin_post_nopriv_pnw_frontend_login', array( __CLASS__, 'frontend_login' ) );
         add_action( 'admin_post_pnw_save_news', array( __CLASS__, 'save_news' ) );
         add_action( 'admin_post_pnw_review_news', array( __CLASS__, 'review_news' ) );
         add_action( 'admin_post_pnw_reviewer_save', array( __CLASS__, 'reviewer_save' ) );
         add_action( 'admin_post_pnw_delete_news', array( __CLASS__, 'delete_news' ) );
+    }
+
+    public static function frontend_login(): void {
+        if ( is_user_logged_in() ) {
+            wp_safe_redirect( PNW_Plugin::manager_url() );
+            exit;
+        }
+
+        check_admin_referer( 'pnw_frontend_login', 'pnw_login_nonce' );
+
+        $login    = isset( $_POST['pnw_login'] ) ? sanitize_text_field( wp_unslash( $_POST['pnw_login'] ) ) : '';
+        $password = isset( $_POST['pnw_password'] ) ? (string) wp_unslash( $_POST['pnw_password'] ) : '';
+        $remember = ! empty( $_POST['pnw_remember'] );
+
+        if ( '' === trim( $login ) || '' === $password ) {
+            self::redirect_login_error( 'empty_fields' );
+        }
+
+        $user = wp_signon(
+            array(
+                'user_login'    => $login,
+                'user_password' => $password,
+                'remember'      => $remember,
+            ),
+            is_ssl()
+        );
+
+        if ( is_wp_error( $user ) ) {
+            self::redirect_login_error( 'invalid_credentials' );
+        }
+
+        if ( ! user_can( $user, 'pnw_submit_news' ) && ! user_can( $user, 'pnw_review_news' ) ) {
+            wp_logout();
+            self::redirect_login_error( 'no_access' );
+        }
+
+        wp_safe_redirect( PNW_Plugin::manager_url() );
+        exit;
     }
 
     private static function require_login_and_cap( string $cap ): void {
@@ -216,6 +255,17 @@ final class PNW_Actions {
         }
 
         set_post_thumbnail( $post_id, $attachment_id );
+    }
+
+    private static function redirect_login_error( string $error ): void {
+        wp_safe_redirect(
+            PNW_Plugin::manager_url(
+                array(
+                    'pnw_login_error' => sanitize_key( $error ),
+                )
+            )
+        );
+        exit;
     }
 
     private static function redirect_notice( string $notice, array $args = array() ): void {

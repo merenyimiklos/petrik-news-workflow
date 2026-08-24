@@ -54,6 +54,47 @@ final class PNW_Admin {
         echo '</tbody></table><p>A szerepkört a <a href="' . esc_url( admin_url( 'users.php' ) ) . '">Felhasználók</a> oldalon lehet hozzárendelni.</p></div>';
 
         echo '<div class="card" style="max-width:900px"><h2>Workflow</h2><p><strong>Piszkozat → Jóváhagyásra vár → Publikálva</strong>, vagy <strong>Javításra visszaküldve → újraküldés</strong>.</p><p>Nincs szükség PublishPressre vagy más fizetős bővítményre.</p></div>';
+
+        self::render_role_diagnostics();
+        echo '</div>';
+    }
+
+    private static function render_role_diagnostics(): void {
+        $admin = get_role( 'administrator' );
+        $mk    = get_role( PNW_Roles::MK_LEADER );
+
+        if ( ! $admin || ! $mk ) {
+            return;
+        }
+
+        $admin_caps = array_keys( array_filter( (array) $admin->capabilities ) );
+        $mk_caps    = array_keys( array_filter( (array) $mk->capabilities ) );
+        sort( $admin_caps );
+        sort( $mk_caps );
+
+        $admin_only = array_values( array_diff( $admin_caps, $mk_caps ) );
+        sort( $admin_only );
+
+        echo '<div class="card" style="max-width:900px"><h2>Belépési / szerepkör diagnosztika</h2>';
+        echo '<p><strong>Fontos:</strong> a WordPress core-ban nincs külön „beléphet” capability. A hitelesítés után a szerepkör capability-jei szabályozzák, mit csinálhat a felhasználó. Ez a blokk azért van, hogy lássuk, valamelyik meglévő plugin/sablon mely admin-jogot használhatja saját belépési feltételként.</p>';
+        echo '<table class="widefat striped"><tbody>';
+        echo '<tr><th style="width:230px">Adminisztrátor capability-k</th><td>' . esc_html( (string) count( $admin_caps ) ) . '</td></tr>';
+        echo '<tr><th>MK-vezető capability-k</th><td>' . esc_html( (string) count( $mk_caps ) ) . '</td></tr>';
+        echo '<tr><th>Csak adminnál lévő capability-k</th><td>' . esc_html( (string) count( $admin_only ) ) . '</td></tr>';
+        echo '</tbody></table>';
+
+        echo '<details style="margin-top:16px"><summary><strong>MK-vezető összes capability megjelenítése</strong></summary><p style="line-height:2">';
+        foreach ( $mk_caps as $cap ) {
+            echo '<code style="display:inline-block;margin:2px 4px 2px 0">' . esc_html( $cap ) . '</code> ';
+        }
+        echo '</p></details>';
+
+        echo '<details style="margin-top:10px"><summary><strong>Adminisztrátorban megvan, MK-vezetőben nincs</strong></summary><p style="line-height:2">';
+        foreach ( $admin_only as $cap ) {
+            echo '<code style="display:inline-block;margin:2px 4px 2px 0">' . esc_html( $cap ) . '</code> ';
+        }
+        echo '</p></details>';
+        echo '<p class="description">A következő lépésben ebből nem adunk vakon adminjogokat az MK-vezetőnek: célzottan azonosítjuk, mely capability-t figyeli a jelenlegi Petrik környezet.</p>';
         echo '</div>';
     }
 

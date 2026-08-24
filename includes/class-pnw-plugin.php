@@ -24,13 +24,22 @@ final class PNW_Plugin {
         PNW_Actions::init();
         PNW_Frontend::init();
         PNW_Admin::init();
+
+        if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
+            add_filter( 'wp_nav_menu_objects', array( __CLASS__, 'hide_manager_page_from_menu' ), 999, 2 );
+        }
     }
 
     public static function activate(): void {
         PNW_Roles::install();
         PNW_Audit::install();
         PNW_Statuses::register();
-        self::ensure_manager_page();
+        $page_id = self::ensure_manager_page();
+
+        if ( $page_id && defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
+            self::remove_manager_page_from_saved_menus( $page_id );
+        }
+
         flush_rewrite_rules();
     }
 
@@ -67,6 +76,49 @@ final class PNW_Plugin {
 
         update_option( 'pnw_manager_page_id', (int) $page_id );
         return (int) $page_id;
+    }
+
+    public static function hide_manager_page_from_menu( array $items, $args ): array {
+        $page_id = absint( get_option( 'pnw_manager_page_id', 0 ) );
+        if ( ! $page_id ) {
+            return $items;
+        }
+
+        return array_values(
+            array_filter(
+                $items,
+                static function ( $item ) use ( $page_id ): bool {
+                    return ! ( isset( $item->object, $item->object_id ) && 'page' === $item->object && (int) $item->object_id === $page_id );
+                }
+            )
+        );
+    }
+
+    private static function remove_manager_page_from_saved_menus( int $page_id ): void {
+        $menu_items = get_posts(
+            array(
+                'post_type'      => 'nav_menu_item',
+                'post_status'    => 'any',
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                'meta_query'     => array(
+                    array(
+                        'key'     => '_menu_item_object_id',
+                        'value'   => (string) $page_id,
+                        'compare' => '=',
+                    ),
+                    array(
+                        'key'     => '_menu_item_object',
+                        'value'   => 'page',
+                        'compare' => '=',
+                    ),
+                ),
+            )
+        );
+
+        foreach ( $menu_items as $menu_item_id ) {
+            wp_delete_post( (int) $menu_item_id, true );
+        }
     }
 
     public static function manager_url( array $args = array() ): string {

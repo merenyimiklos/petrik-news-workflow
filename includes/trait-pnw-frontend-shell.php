@@ -63,6 +63,15 @@ trait PNW_Frontend_Shell_Trait {
     }
 
     private static function render_login(): void {
+        $error = isset( $_GET['pnw_login_error'] ) ? sanitize_key( wp_unslash( $_GET['pnw_login_error'] ) ) : '';
+        $messages = array(
+            'empty_fields'        => 'Add meg a felhasználóneved/e-mail címed és a jelszavad.',
+            'invalid_credentials' => 'A megadott felhasználónév/e-mail cím vagy jelszó nem megfelelő.',
+            'no_access'           => 'Ezzel a felhasználóval nincs jogosultság a Petrik Hírkezelő használatához.',
+            'auth_rejected'       => 'A WordPress hitelesítési rétege blokkolta ezt a belépést. A fiók és a szerepkör ellenőrzése szükséges.',
+            'security'            => 'A belépési kérés lejárt vagy érvénytelen. Töltsd újra az oldalt és próbáld újra.',
+        );
+
         echo '<section class="pnw-login-card">';
         echo '<div class="pnw-kicker">Petrik</div>';
         echo '<h2>Hírkezelő</h2>';
@@ -70,16 +79,19 @@ trait PNW_Frontend_Shell_Trait {
             echo '<div class="pnw-notice pnw-notice-warning"><strong>TESZTÜZEM.</strong> Ezen a felületen jelenleg egyetlen hír sem publikálható.</div>';
         }
         echo '<p>A felületet munkaközösség-vezetők, igazgatóhelyettesek és az igazgató használhatják.</p>';
-        wp_login_form(
-            array(
-                'echo'           => true,
-                'redirect'       => PNW_Plugin::manager_url(),
-                'label_username' => 'Felhasználónév vagy e-mail',
-                'label_password' => 'Jelszó',
-                'label_log_in'   => 'Bejelentkezés',
-                'remember'       => true,
-            )
-        );
+
+        if ( $error && isset( $messages[ $error ] ) ) {
+            echo '<div class="pnw-notice pnw-notice-error pnw-login-error">' . esc_html( $messages[ $error ] ) . '</div>';
+        }
+
+        echo '<form class="pnw-login-form" method="post" action="' . esc_url( PNW_Plugin::manager_url() ) . '">';
+        echo '<input type="hidden" name="pnw_frontend_action" value="login">';
+        wp_nonce_field( 'pnw_frontend_login', 'pnw_login_nonce' );
+        echo '<p class="login-username"><label for="pnw-login-user">Felhasználónév vagy e-mail</label><input id="pnw-login-user" type="text" name="pnw_login" autocomplete="username" required></p>';
+        echo '<p class="login-password"><label for="pnw-login-password">Jelszó</label><input id="pnw-login-password" type="password" name="pnw_password" autocomplete="current-password" required></p>';
+        echo '<p class="login-remember"><label><input type="checkbox" name="pnw_remember" value="1"> Emlékezzen rám</label></p>';
+        echo '<p class="login-submit"><button class="pnw-button" type="submit">Bejelentkezés</button></p>';
+        echo '</form>';
         echo '</section>';
     }
 

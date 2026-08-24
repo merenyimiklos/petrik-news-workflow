@@ -1,5 +1,52 @@
 # Changelog
 
+## 1.0.9-test - 2026-08-25
+
+- Beépített GitHub-alapú natív WordPress frissítő került a pluginba.
+- A plugin az `update.json` manifestet ellenőrzi a GitHub deployment branch-en.
+- Újabb verziónál a WordPress saját **Bővítmények → Frissítés most** felületén jelenik meg a frissítés.
+- A GitHub branch ZIP eltérő könyvtárnevét a plugin frissítés közben automatikusan `petrik-news-workflow` névre normalizálja.
+- A frissítéshez nincs szükség GitHub tokenre vagy fizetős WordPress pluginra, mert a repository publikus.
+- Ettől a verziótól a további fejlesztésekhez nem kell kézzel új ZIP-et feltölteni a WordPressbe.
+
+## 1.0.8-test - 2026-08-25
+
+- Az MK-vezető belépése most valódi WordPress munkamenetet hoz létre (`wp_set_auth_cookie`), ugyanúgy, mint egy normál WordPress belépés.
+- A hitelesítés a WordPress saját jelszóhash-ellenőrzését használja, de nem engedi, hogy egy külső role-based login filter blokkolja a Petrik saját szerepköreit.
+- A munkaközösség-vezető szerepkör Contributor-kompatibilis alapjogokat kap (`read`, `edit_posts`, `delete_posts`, `level_0`, `level_1`) + képfeltöltés + `pnw_submit_news`.
+- Az MK-vezető továbbra sem kap `publish_posts`, `edit_others_posts`, adminisztrátori vagy workflow-jóváhagyási jogot.
+- Sikeres WordPress belépés után az MK-vezetőt a plugin továbbra is automatikusan a Hírkezelőbe irányítja, a `/wp-admin` felület helyett.
+
+## 1.0.6-test - 2026-08-24
+
+- A Hírkezelő bejelentkezése teljesen frontend útvonalon történik; kijelentkezett felhasználónál sem használ `/wp-admin/admin-post.php` címet.
+- A munkaközösség-vezetői szerepkör szükséges capability-jeit a plugin automatikusan helyreállítja frissítés után is.
+- A vezetői/admin dashboard külön **Saját piszkozatok és javítások** blokkban mutatja a saját elmentett piszkozatokat.
+- Az e-mailes bejelentkezés explicit felhasználónév-feloldást használ.
+
+## 1.0.5-test - 2026-08-24
+
+- A Hírkezelő saját frontend bejelentkezési végpontot kapott, így nem függ a `wp-login.php` URL-től és kompatibilis a WPS Hide Login használatával.
+- Sikertelen belépésnél egyértelmű hibaüzenet jelenik meg.
+- Sikeres belépés után csak MK-vezető / vezetői Hírkezelő-jogosultsággal lehet belépni a belső felületre.
+- Felhasználónév és e-mail cím egyaránt használható.
+
+## 1.0.4-test - 2026-08-24
+
+- A vezetői részletező nézetben is megjelenik a **Hír módosítása** gomb, ha a visszaküldött hírt olyan felhasználó nézi, akinek híríró jogosultsága is van (pl. admin tesztfiók).
+- A valódi igazgatóhelyettes/igazgató továbbra sem kap híríró jogosultságot, így a javítás az MK-vezető feladata marad.
+
+## 1.0.3-test - 2026-08-24
+
+- A javításra visszaküldött híreknél egyértelmű **Módosítás / Hír módosítása** művelet került a felületre.
+- Javítás után a fő művelet neve **Újraküldés jóváhagyásra**, így a teljes visszaküldés → javítás → újraellenőrzés workflow egyértelmű.
+- A hírszöveg szerkesztője letisztult, csak vizuális szerkesztési módot használ; a technikai Kód/Quicktags/„tagek lezárása” elemek eltűntek.
+- Egyszerűbb TinyMCE eszköztár: címsor, félkövér/dőlt, listák, idézet, igazítás, link, visszavonás, formázás törlése és teljes képernyő.
+- Új **Gyors előnézet** popup a még el nem mentett cím, kategóriák, kivonat, formázott hírszöveg és kiemelt kép megtekintéséhez.
+- A kiválasztott kiemelt kép már feltöltés előtt azonnal előnézhető.
+- A vezetői szerkesztőben külön gyors előnézet és külön WordPress/Divi weboldal-előnézet érhető el.
+- Asset verzió emelve, hogy a WordPress/böngésző cache biztosan az új CSS/JS fájlokat töltse be.
+
 ## 1.0.1-test - 2026-08-24
 
 - A minimális PHP-verzió 7.4-re módosítva a Petrik jelenlegi szerverkörnyezetéhez.
