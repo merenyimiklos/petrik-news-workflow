@@ -67,20 +67,24 @@ trait PNW_Frontend_Published_Trait {
             return;
         }
 
-        echo '<div class="pnw-table-card pnw-published-card"><div class="pnw-table-wrap"><table class="pnw-table pnw-published-table"><thead><tr><th>Hír</th><th>Szerző</th><th>Publikálva</th><th>Forrás</th><th>Műveletek</th></tr></thead><tbody>';
+        echo '<div class="pnw-table-card pnw-published-card"><div class="pnw-table-wrap"><table class="pnw-table pnw-published-table"><thead><tr><th>Hír</th><th>Szerző</th><th>Publikálva</th><th>Forrás</th></tr></thead><tbody>';
         foreach ( $query->posts as $post ) {
             $author  = get_userdata( (int) $post->post_author );
             $managed = '1' === (string) get_post_meta( $post->ID, '_pnw_managed', true );
 
-            echo '<tr>';
+            echo '<tr class="pnw-published-main-row">';
             echo '<td data-label="Hír"><strong class="pnw-published-title">' . esc_html( $post->post_title ?: '(Névtelen hír)' ) . '</strong><small class="pnw-published-meta">' . esc_html( self::category_names( (int) $post->ID ) ) . '</small></td>';
             echo '<td data-label="Szerző">' . esc_html( $author ? $author->display_name : '—' ) . '</td>';
             echo '<td data-label="Publikálva"><time datetime="' . esc_attr( get_the_date( DATE_W3C, $post ) ) . '">' . esc_html( get_the_date( 'Y.m.d. H:i', $post ) ) . '</time></td>';
             echo '<td data-label="Forrás"><span class="pnw-published-source">' . esc_html( $managed ? 'Hírkezelő' : 'Korábbi WordPress hír' ) . '</span></td>';
-            echo '<td data-label="Műveletek" class="pnw-published-actions-cell"><div class="pnw-published-actions">';
+            echo '</tr>';
+
+            echo '<tr class="pnw-published-action-row"><td colspan="4">';
+            echo '<div class="pnw-published-inline-actions">';
             echo '<a class="pnw-button pnw-button-secondary" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás</a>';
             echo '<a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published_edit', 'post_id' => $post->ID ) ) ) . '">' . esc_html( $test_mode ? 'Részletek' : 'Szerkesztés' ) . '</a>';
-            echo '</div></td></tr>';
+            echo '</div>';
+            echo '</td></tr>';
         }
         echo '</tbody></table></div></div>';
 
