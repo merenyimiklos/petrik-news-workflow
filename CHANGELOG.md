@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.9-test - 2026-08-25
+
+- Beépített GitHub-alapú natív WordPress frissítő került a pluginba.
+- A plugin az `update.json` manifestet ellenőrzi a GitHub deployment branch-en.
+- Újabb verziónál a WordPress saját **Bővítmények → Frissítés most** felületén jelenik meg a frissítés.
+- A GitHub branch ZIP eltérő könyvtárnevét a plugin frissítés közben automatikusan `petrik-news-workflow` névre normalizálja.
+- A frissítéshez nincs szükség GitHub tokenre vagy fizetős WordPress pluginra, mert a repository publikus.
+- Ettől a verziótól a további fejlesztésekhez nem kell kézzel új ZIP-et feltölteni a WordPressbe.
+
 ## 1.0.8-test - 2026-08-25
 
 - Az MK-vezető belépése most valódi WordPress munkamenetet hoz létre (`wp_set_auth_cookie`), ugyanúgy, mint egy normál WordPress belépés.
