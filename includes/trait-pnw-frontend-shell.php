@@ -68,6 +68,7 @@ trait PNW_Frontend_Shell_Trait {
             'empty_fields'        => 'Add meg a felhasználóneved/e-mail címed és a jelszavad.',
             'invalid_credentials' => 'A megadott felhasználónév/e-mail cím vagy jelszó nem megfelelő.',
             'no_access'           => 'Ezzel a felhasználóval nincs jogosultság a Petrik Hírkezelő használatához.',
+            'auth_rejected'       => 'A WordPress hitelesítési rétege blokkolta ezt a belépést. A fiók és a szerepkör ellenőrzése szükséges.',
             'security'            => 'A belépési kérés lejárt vagy érvénytelen. Töltsd újra az oldalt és próbáld újra.',
         );
 
@@ -83,8 +84,6 @@ trait PNW_Frontend_Shell_Trait {
             echo '<div class="pnw-notice pnw-notice-error pnw-login-error">' . esc_html( $messages[ $error ] ) . '</div>';
         }
 
-        // Intentionally POST to the public Hírkezelő URL, not /wp-admin.
-        // This keeps login compatible with WPS Hide Login and similar plugins.
         echo '<form class="pnw-login-form" method="post" action="' . esc_url( PNW_Plugin::manager_url() ) . '">';
         echo '<input type="hidden" name="pnw_frontend_action" value="login">';
         wp_nonce_field( 'pnw_frontend_login', 'pnw_login_nonce' );
