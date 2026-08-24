@@ -169,7 +169,7 @@ final class PNW_Updater {
             return null;
         }
 
-        set_site_transient( self::CACHE_KEY, $data, 10 * MINUTE_IN_SECONDS );
+        set_site_transient( self::CACHE_KEY, $data, 1 * MINUTE_IN_SECONDS );
         return $data;
     }
 }
