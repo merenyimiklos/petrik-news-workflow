@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PNW_Updater {
     private const OWNER  = 'merenyimiklos';
     private const REPO   = 'petrik-news-workflow';
-    private const BRANCH = 'agent/initial-wordpress-workflow';
+    private const BRANCH = 'main';
     private const CACHE_KEY = 'pnw_github_update_manifest';
 
     public static function init(): void {
