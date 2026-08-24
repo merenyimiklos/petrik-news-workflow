@@ -7,22 +7,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Native WordPress updater backed by the public GitHub repository.
  *
- * The plugin checks update.json on the deployment branch and exposes a normal
- * WordPress plugin update when the remote version is newer. The downloaded
- * GitHub branch archive has a generated folder name, so we normalize it back
- * to petrik-news-workflow during the upgrade.
+ * The plugin reads update.json directly from raw.githubusercontent.com and
+ * exposes a normal WordPress plugin update when the remote version is newer.
+ * The downloaded GitHub branch archive has a generated folder name, so we
+ * normalize it back to petrik-news-workflow during the upgrade.
  */
 final class PNW_Updater {
-    private const OWNER  = 'merenyimiklos';
-    private const REPO   = 'petrik-news-workflow';
-    private const BRANCH = 'main';
-    private const CACHE_KEY = 'pnw_github_update_manifest';
+    private const OWNER     = 'merenyimiklos';
+    private const REPO      = 'petrik-news-workflow';
+    private const BRANCH    = 'main';
+    private const CACHE_KEY = 'pnw_github_update_manifest_v2';
 
     public static function init(): void {
         add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'check_for_update' ) );
         add_filter( 'plugins_api', array( __CLASS__, 'plugin_information' ), 20, 3 );
         add_filter( 'upgrader_source_selection', array( __CLASS__, 'normalize_source_folder' ), 10, 4 );
         add_action( 'upgrader_process_complete', array( __CLASS__, 'clear_cache_after_upgrade' ), 10, 2 );
+        add_action( 'load-update-core.php', array( __CLASS__, 'maybe_clear_cache_for_manual_check' ), 1 );
+        add_action( 'load-plugins.php', array( __CLASS__, 'maybe_clear_cache_for_manual_check' ), 1 );
+    }
+
+    public static function maybe_clear_cache_for_manual_check(): void {
+        if ( ! current_user_can( 'update_plugins' ) ) {
+            return;
+        }
+
+        if ( isset( $_GET['force-check'] ) || isset( $_GET['plugin_status'] ) ) {
+            delete_site_transient( self::CACHE_KEY );
+        }
     }
 
     public static function check_for_update( $transient ) {
@@ -35,7 +47,7 @@ final class PNW_Updater {
             return $transient;
         }
 
-        $plugin = plugin_basename( PNW_FILE );
+        $plugin         = plugin_basename( PNW_FILE );
         $remote_version = (string) $manifest['version'];
 
         if ( version_compare( PNW_VERSION, $remote_version, '>=' ) ) {
@@ -46,15 +58,15 @@ final class PNW_Updater {
         }
 
         $update = (object) array(
-            'id'            => 'github.com/' . self::OWNER . '/' . self::REPO,
-            'slug'          => dirname( $plugin ),
-            'plugin'        => $plugin,
-            'new_version'   => $remote_version,
-            'url'           => 'https://github.com/' . self::OWNER . '/' . self::REPO,
-            'package'       => esc_url_raw( (string) $manifest['package'] ),
-            'requires'      => isset( $manifest['requires'] ) ? (string) $manifest['requires'] : '6.4',
-            'requires_php'  => isset( $manifest['requires_php'] ) ? (string) $manifest['requires_php'] : '7.4',
-            'tested'        => isset( $manifest['tested'] ) ? (string) $manifest['tested'] : '',
+            'id'           => 'github.com/' . self::OWNER . '/' . self::REPO,
+            'slug'         => dirname( $plugin ),
+            'plugin'       => $plugin,
+            'new_version'  => $remote_version,
+            'url'          => 'https://github.com/' . self::OWNER . '/' . self::REPO,
+            'package'      => esc_url_raw( (string) $manifest['package'] ),
+            'requires'     => isset( $manifest['requires'] ) ? (string) $manifest['requires'] : '6.4',
+            'requires_php' => isset( $manifest['requires_php'] ) ? (string) $manifest['requires_php'] : '7.4',
+            'tested'       => isset( $manifest['tested'] ) ? (string) $manifest['tested'] : '',
         );
 
         $transient->response[ $plugin ] = $update;
@@ -104,8 +116,8 @@ final class PNW_Updater {
             return $source;
         }
 
-        $expected_dir = dirname( $plugin );
-        $target = trailingslashit( $remote_source ) . $expected_dir . '/';
+        $expected_dir      = dirname( $plugin );
+        $target            = trailingslashit( $remote_source ) . $expected_dir . '/';
         $normalized_source = trailingslashit( (string) $source );
 
         if ( untrailingslashit( $normalized_source ) === untrailingslashit( $target ) ) {
@@ -132,6 +144,7 @@ final class PNW_Updater {
         }
 
         delete_site_transient( self::CACHE_KEY );
+        delete_site_transient( 'pnw_github_update_manifest' );
         delete_site_transient( 'update_plugins' );
     }
 
@@ -142,10 +155,11 @@ final class PNW_Updater {
         }
 
         $url = sprintf(
-            'https://api.github.com/repos/%s/%s/contents/update.json?ref=%s',
+            'https://raw.githubusercontent.com/%s/%s/%s/update.json?pnw=%s',
             rawurlencode( self::OWNER ),
             rawurlencode( self::REPO ),
-            rawurlencode( self::BRANCH )
+            rawurlencode( self::BRANCH ),
+            rawurlencode( PNW_VERSION )
         );
 
         $response = wp_remote_get(
@@ -153,9 +167,8 @@ final class PNW_Updater {
             array(
                 'timeout' => 8,
                 'headers' => array(
-                    'Accept'               => 'application/vnd.github.raw+json',
-                    'User-Agent'           => 'Petrik-News-Workflow/' . PNW_VERSION,
-                    'X-GitHub-Api-Version' => '2022-11-28',
+                    'User-Agent' => 'Petrik-News-Workflow/' . PNW_VERSION,
+                    'Accept'     => 'application/json',
                 ),
             )
         );
@@ -169,7 +182,7 @@ final class PNW_Updater {
             return null;
         }
 
-        set_site_transient( self::CACHE_KEY, $data, 1 * MINUTE_IN_SECONDS );
+        set_site_transient( self::CACHE_KEY, $data, MINUTE_IN_SECONDS );
         return $data;
     }
 }
