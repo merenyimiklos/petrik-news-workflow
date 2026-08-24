@@ -1,8 +1,8 @@
 {
-  "version": "1.0.14-test",
+  "version": "1.0.15-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Kint lévő hírek design-javítás: a műveletgombok külön, szélesebb oszlopban jelennek meg, nem vágódnak le; a táblázat oszlopai kiegyensúlyozottabbak, a kereső rendezettebb, a forrásjelvény olvashatóbb, mobilon pedig kártyás elrendezésre vált."
+  "changelog": "Kint lévő hírek elrendezés-javítás: a Műveletek külön jobb oldali oszlopa megszűnt. Minden hír alatt teljes szélességű külön műveleti sor jelenik meg, benne a Megnyitás és Részletek/Szerkesztés gombok egymás mellett, így kisebb képernyőn sem vágódnak le."
 }
