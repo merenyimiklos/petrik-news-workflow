@@ -47,6 +47,11 @@ final class PNW_Audit {
     ): void {
         global $wpdb;
 
+        if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE && 'approved' === $action && 'publish' === $new_status ) {
+            $action     = 'test_approved';
+            $new_status = PNW_Statuses::TEST_APPROVED;
+        }
+
         $user_id = null === $user_id ? get_current_user_id() : $user_id;
 
         $wpdb->insert(
