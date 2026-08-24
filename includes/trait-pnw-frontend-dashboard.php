@@ -69,6 +69,25 @@ trait PNW_Frontend_Dashboard_Trait {
         self::stat_card( $today, 'Ma publikálva', 'publish' );
         echo '</div>';
 
+        if ( current_user_can( 'pnw_submit_news' ) ) {
+            $own_working = get_posts(
+                array(
+                    'post_type'      => 'post',
+                    'meta_key'       => '_pnw_managed',
+                    'meta_value'     => '1',
+                    'author'         => get_current_user_id(),
+                    'post_status'    => array( 'draft', PNW_Statuses::REVISION ),
+                    'posts_per_page' => 50,
+                    'orderby'        => 'modified',
+                    'order'          => 'DESC',
+                )
+            );
+
+            echo '<div class="pnw-table-card"><div class="pnw-card-heading"><div><h4>Saját piszkozatok és javítások</h4><p>Az admin tesztfiókkal készített, még be nem küldött hírek.</p></div><a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a></div>';
+            self::render_posts_table( $own_working, false );
+            echo '</div>';
+        }
+
         echo '<div class="pnw-table-card"><div class="pnw-card-heading"><div><h4>Jóváhagyási sor</h4><p>Legrégebbi beküldés elöl.</p></div></div>';
         self::render_posts_table( $pending, true );
         echo '</div>';
