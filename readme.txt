@@ -3,7 +3,7 @@ Contributors: petrik
 Tags: editorial workflow, approval, news, school
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.5-test
+Stable tag: 1.0.6-test
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,13 +18,15 @@ A tesztcsomagban hard safety TEST MODE aktív: a plugin által kezelt hír sem a
 Fő funkciók:
 
 * frontend Hírkezelő;
-* saját frontend belépés WPS Hide Login kompatibilitással;
+* teljesen frontend belépés WPS Hide Login kompatibilitással;
 * MK-vezető / igazgatóhelyettes / igazgató szerepkörök;
+* szerepkör-capability automatikus javítás frissítés után;
 * pending review workflow;
 * visszaküldés javításra;
 * e-mail értesítések;
 * kategória-korlátozás felhasználónként;
 * audit napló;
+* admin tesztfiók saját piszkozatainak külön listázása;
 * hard test-mode publikálásvédelem;
 * nincs fizetős pluginfüggőség.
 
@@ -37,6 +39,11 @@ Fő funkciók:
 5. Tesztverziónál ellenőrizd, hogy a TESZT MÓD banner látható.
 
 == Changelog ==
+
+= 1.0.6-test =
+* A login POST sem használ többé `/wp-admin` útvonalat.
+* MK-vezetői capability-k automatikus helyreállítása.
+* Admin/vezetői nézetben külön saját piszkozat-lista.
 
 = 1.0.5-test =
 * Saját frontend login a WPS Hide Login kompatibilitás miatt.
