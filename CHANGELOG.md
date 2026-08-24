@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.5-test - 2026-08-24
+
+- A Hírkezelő saját frontend bejelentkezési végpontot kapott, így nem függ a `wp-login.php` URL-től és kompatibilis a WPS Hide Login használatával.
+- Sikertelen belépésnél egyértelmű hibaüzenet jelenik meg.
+- Sikeres belépés után csak MK-vezető / vezetői Hírkezelő-jogosultsággal lehet belépni a belső felületre.
+- Felhasználónév és e-mail cím egyaránt használható.
+
 ## 1.0.4-test - 2026-08-24
 
 - A vezetői részletező nézetben is megjelenik a **Hír módosítása** gomb, ha a visszaküldött hírt olyan felhasználó nézi, akinek híríró jogosultsága is van (pl. admin tesztfiók).
