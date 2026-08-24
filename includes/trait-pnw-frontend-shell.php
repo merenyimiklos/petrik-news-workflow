@@ -117,7 +117,7 @@ trait PNW_Frontend_Shell_Trait {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a>';
         }
         if ( current_user_can( 'pnw_view_audit_log' ) ) {
-            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) . '">Napló</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) ) . '">Napló</a>';
         }
         echo '<a class="pnw-nav-spacer" href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">Kijelentkezés</a>';
         echo '</nav>';
