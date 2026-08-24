@@ -3,7 +3,7 @@
  * Plugin Name: Petrik News Workflow
  * Plugin URI:  https://github.com/merenyimiklos/petrik-news-workflow
  * Description: Belső hírbeküldési és vezetői jóváhagyási workflow a Petrik WordPress oldalához.
- * Version:     1.0.9-test
+ * Version:     1.0.10-test
  * Author:      Petrik
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,19 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'PNW_VERSION', '1.0.9-test' );
+define( 'PNW_VERSION', '1.0.10-test' );
 define( 'PNW_FILE', __FILE__ );
 define( 'PNW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PNW_URL', plugin_dir_url( __FILE__ ) );
 
-/**
- * Hard safety switch for the first Petrik production-server trial.
- *
- * While this is true, Petrik News Workflow can never publish a managed news
- * item. An approval is recorded with a private test-only post status instead.
- * This constant is intentionally hard-coded for the test package so it cannot
- * be disabled accidentally from the WordPress admin UI.
- */
 define( 'PNW_TEST_MODE', true );
 
 require_once PNW_DIR . 'includes/class-pnw-roles.php';
