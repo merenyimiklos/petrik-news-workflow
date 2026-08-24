@@ -64,12 +64,17 @@ trait PNW_Frontend_Shell_Trait {
 
     private static function render_login(): void {
         $error = isset( $_GET['pnw_login_error'] ) ? sanitize_key( wp_unslash( $_GET['pnw_login_error'] ) ) : '';
+        if ( ! $error && ! empty( $_GET['pnw_session_check'] ) ) {
+            $error = 'session_failed';
+        }
+
         $messages = array(
             'empty_fields'        => 'Add meg a felhasználóneved/e-mail címed és a jelszavad.',
             'invalid_credentials' => 'A megadott felhasználónév/e-mail cím vagy jelszó nem megfelelő.',
             'no_access'           => 'Ezzel a felhasználóval nincs jogosultság a Petrik Hírkezelő használatához.',
             'auth_rejected'       => 'A WordPress hitelesítési rétege blokkolta ezt a belépést. A fiók és a szerepkör ellenőrzése szükséges.',
             'security'            => 'A belépési kérés lejárt vagy érvénytelen. Töltsd újra az oldalt és próbáld újra.',
+            'session_failed'      => 'A jelszó helyes volt, de a WordPress bejelentkezési munkamenet nem maradt meg. Ez már nem jelszó- vagy MK-szerepkör hiba; egy másik bővítmény vagy cookie-beállítás törli/blokkolja a munkamenetet.',
         );
 
         echo '<section class="pnw-login-card">';
