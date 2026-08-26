@@ -2,15 +2,34 @@
     white-space: nowrap;
 }
 
+/* A Tiszta lap legyen egyértelmű másodlagos művelet, ne fehér szöveg fehér háttéren. */
+.pnw-template-controls .pnw-button-ghost,
 .pnw-button-ghost {
-    background: transparent;
-    border: 1px solid rgba(20, 33, 61, 0.18);
-    color: inherit;
+    background: #ffffff !important;
+    border: 1px solid #d0d5dd !important;
+    color: #344054 !important;
+    box-shadow: 0 2px 7px rgba(16, 24, 40, .06) !important;
 }
 
+.pnw-template-controls .pnw-button-ghost:hover,
+.pnw-template-controls .pnw-button-ghost:focus,
 .pnw-button-ghost:hover,
 .pnw-button-ghost:focus {
-    background: rgba(20, 33, 61, 0.05);
+    background: #f8fafc !important;
+    border-color: #98a2b3 !important;
+    color: #172033 !important;
+}
+
+/* Disabled állapotban is jól olvasható marad, de egyértelműen inaktív. */
+.pnw-template-controls .pnw-clean-slate-button:disabled,
+.pnw-clean-slate-button:disabled {
+    opacity: 1 !important;
+    background: #f2f4f7 !important;
+    border-color: #d0d5dd !important;
+    color: #98a2b3 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    transform: none !important;
 }
 
 .pnw-actions .pnw-delete-form {
