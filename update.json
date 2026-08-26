@@ -1,8 +1,8 @@
 {
-  "version": "1.1.2",
+  "version": "1.2.0",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Kategória-kötelezőség felhasználóbarát javítása. Ha a hírszerkesztőben nincs kategória kiválasztva, az űrlap már elküldés előtt megáll, a kategória blokk piros kiemelést és egyértelmű hibaüzenetet kap, az oldal odagörget, és a már beírt cím, szöveg vagy kiválasztott kép nem vész el. A szerveroldali ellenőrzés biztonsági tartalékként megmaradt."
+  "changelog": "Nagy használhatósági frissítés: automatikus piszkozatmentés helyi biztonsági másolattal és 30 másodperces WordPress-mentéssel; öt egyszerű hírsablon; vezetői azonnali vagy időzített publikálás WordPress future státusszal és e-mail értesítésekkel; jelentősen javított mobilos szerkesztés; új Statisztika felület publikálási, jóváhagyási, szerzői és kategória mutatókkal. A CI mostantól PHP 7.4 mellett JavaScript szintaxist is ellenőriz."
 }
