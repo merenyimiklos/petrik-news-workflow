@@ -7,23 +7,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PNW_Access {
     public static function init(): void {
         add_filter( 'show_admin_bar', array( __CLASS__, 'maybe_hide_admin_bar' ) );
-        add_action( 'admin_init', array( __CLASS__, 'redirect_mk_from_admin' ) );
+        add_action( 'admin_init', array( __CLASS__, 'redirect_workflow_roles_from_admin' ) );
         add_filter( 'login_redirect', array( __CLASS__, 'login_redirect' ), 10, 3 );
         add_filter( 'wp_insert_post_data', array( __CLASS__, 'force_mk_safe_status' ), 10, 2 );
         add_filter( 'map_meta_cap', array( __CLASS__, 'lock_managed_posts_for_mk' ), 20, 4 );
     }
 
-    public static function maybe_hide_admin_bar( bool $show ): bool {
-        return PNW_Roles::is_mk_leader() ? false : $show;
+    /**
+     * The three Petrik workflow roles are intentionally frontend-only users.
+     * Administrators remain normal wp-admin users even if they also have one
+     * of the custom workflow capabilities.
+     */
+    public static function is_workflow_only_user( ?WP_User $user = null ): bool {
+        $user = $user ?: wp_get_current_user();
+        if ( ! $user->exists() || in_array( 'administrator', (array) $user->roles, true ) ) {
+            return false;
+        }
+
+        return (bool) array_intersect(
+            array( PNW_Roles::MK_LEADER, PNW_Roles::DEPUTY, PNW_Roles::DIRECTOR ),
+            (array) $user->roles
+        );
     }
 
-    public static function redirect_mk_from_admin(): void {
-        if ( ! is_user_logged_in() || ! PNW_Roles::is_mk_leader() ) {
+    public static function maybe_hide_admin_bar( bool $show ): bool {
+        return self::is_workflow_only_user() ? false : $show;
+    }
+
+    /**
+     * Keep workflow roles inside the dedicated Hírkezelő. The exceptions are
+     * required by frontend forms, TinyMCE media uploads and WordPress AJAX.
+     */
+    public static function redirect_workflow_roles_from_admin(): void {
+        if ( ! is_user_logged_in() || ! self::is_workflow_only_user() ) {
             return;
         }
 
         global $pagenow;
-        $allowed = array( 'admin-post.php', 'async-upload.php' );
+        $allowed = array( 'admin-post.php', 'async-upload.php', 'media-upload.php' );
         if ( wp_doing_ajax() || in_array( (string) $pagenow, $allowed, true ) ) {
             return;
         }
@@ -33,13 +54,17 @@ final class PNW_Access {
     }
 
     public static function login_redirect( string $redirect_to, string $requested, $user ): string {
-        if ( $user instanceof WP_User && user_can( $user, 'pnw_submit_news' ) ) {
+        if ( $user instanceof WP_User && self::is_workflow_only_user( $user ) ) {
             return PNW_Plugin::manager_url();
         }
 
         return $redirect_to;
     }
 
+    /**
+     * MK leaders must never be able to publish directly through a WordPress
+     * post operation. Their content has to enter the approval workflow first.
+     */
     public static function force_mk_safe_status( array $data, array $postarr ): array {
         if ( ! is_user_logged_in() || ! PNW_Roles::is_mk_leader() ) {
             return $data;
