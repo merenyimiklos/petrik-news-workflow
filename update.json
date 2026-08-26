@@ -1,8 +1,8 @@
 {
-  "version": "1.0.15-test",
+  "version": "1.0.16-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Kint lévő hírek elrendezés-javítás: a Műveletek külön jobb oldali oszlopa megszűnt. Minden hír alatt teljes szélességű külön műveleti sor jelenik meg, benne a Megnyitás és Részletek/Szerkesztés gombok egymás mellett, így kisebb képernyőn sem vágódnak le."
+  "changelog": "Felhasználóbarát szerkesztőbővítés: vizuális Táblázat beszúrása eszköz sor- és oszlopszám, opcionális cím és fejlécsor megadásával; a cellák ezután közvetlenül szerkeszthetők. A Kategóriák résznél új + Új kategória ablak került be, amely oldal-újratöltés nélkül létrehozza és automatikusan ki is választja az új kategóriát, opcionális szülőkategóriával. Kifejezetten nem technikai MK-vezetők egyszerű használatára kialakítva."
 }
