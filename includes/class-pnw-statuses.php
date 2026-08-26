@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PNW_Statuses {
     public const REVISION      = 'pnw_revision';
     public const TEST_APPROVED = 'pnw_test_ok';
+    public const ARCHIVED      = 'pnw_archived';
 
     public static function init(): void {
         add_action( 'init', array( __CLASS__, 'register' ) );
@@ -48,6 +49,24 @@ final class PNW_Statuses {
                 ),
             )
         );
+
+        register_post_status(
+            self::ARCHIVED,
+            array(
+                'label'                     => 'Archiválva',
+                'public'                    => false,
+                'internal'                  => false,
+                'protected'                 => true,
+                'exclude_from_search'       => true,
+                'show_in_admin_all_list'    => true,
+                'show_in_admin_status_list' => true,
+                'label_count'               => _n_noop(
+                    'Archiválva <span class="count">(%s)</span>',
+                    'Archiválva <span class="count">(%s)</span>',
+                    'petrik-news-workflow'
+                ),
+            )
+        );
     }
 
     public static function label( string $status ): string {
@@ -56,6 +75,7 @@ final class PNW_Statuses {
             'pending'           => 'Jóváhagyásra vár',
             self::REVISION      => 'Javításra visszaküldve',
             self::TEST_APPROVED => 'Tesztben jóváhagyva – nem publikus',
+            self::ARCHIVED      => 'Archiválva – nem publikus',
             'publish'           => 'Publikálva',
             'future'            => 'Időzítve',
             'private'           => 'Privát',
@@ -68,6 +88,10 @@ final class PNW_Statuses {
     public static function css_class( string $status ): string {
         if ( self::TEST_APPROVED === $status ) {
             return 'pending';
+        }
+
+        if ( self::ARCHIVED === $status ) {
+            return 'draft';
         }
 
         $allowed = array( 'draft', 'pending', self::REVISION, 'publish', 'future' );
