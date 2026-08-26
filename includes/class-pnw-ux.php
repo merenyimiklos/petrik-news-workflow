@@ -83,7 +83,7 @@ final class PNW_UX {
                 'autosaveInterval' => 30000,
                 'userId'           => get_current_user_id(),
                 'managerUrl'       => PNW_Plugin::manager_url(),
-                'scheduleMin'      => $minimum->format( 'Y-m-d\\TH:i' ),
+                'scheduleMin'      => $minimum->format( 'Y-m-d\TH:i' ),
                 'timezone'         => wp_timezone_string() ?: 'Europe/Budapest',
             )
         );
