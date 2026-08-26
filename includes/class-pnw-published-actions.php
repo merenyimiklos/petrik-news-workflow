@@ -6,14 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Mutating actions for already published news.
- *
- * These actions are intentionally disabled while PNW_TEST_MODE is active so
- * the live Petrik site's existing posts cannot be changed during the pilot.
  */
 final class PNW_Published_Actions {
     public static function init(): void {
         add_action( 'admin_post_pnw_update_published_news', array( __CLASS__, 'update_published_news' ) );
-        add_action( 'admin_post_pnw_trash_published_news', array( __CLASS__, 'trash_published_news' ) );
+        add_action( 'admin_post_pnw_archive_published_news', array( __CLASS__, 'archive_published_news' ) );
+        add_action( 'admin_post_pnw_restore_archived_news', array( __CLASS__, 'restore_archived_news' ) );
+
+        // Backward compatibility for an already-open/cached 1.1.0 page: the
+        // old "trash" action now archives instead of sending anything to Trash.
+        add_action( 'admin_post_pnw_trash_published_news', array( __CLASS__, 'legacy_trash_published_news' ) );
     }
 
     public static function update_published_news(): void {
@@ -64,27 +66,82 @@ final class PNW_Published_Actions {
         self::redirect_notice( 'published_updated', array( 'pnw_view' => 'published_edit', 'post_id' => $post_id ) );
     }
 
-    public static function trash_published_news(): void {
+    public static function archive_published_news(): void {
+        self::require_access();
+        check_admin_referer( 'pnw_archive_published_news', 'pnw_nonce' );
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        if ( self::test_mode() ) {
+            self::redirect_notice( 'production_only', array( 'pnw_view' => 'published' ) );
+        }
+
+        self::archive_post( $post_id );
+    }
+
+    public static function legacy_trash_published_news(): void {
         self::require_access();
         check_admin_referer( 'pnw_trash_published_news', 'pnw_nonce' );
 
         $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
         if ( self::test_mode() ) {
-            self::redirect_notice( 'production_only', array( 'pnw_view' => 'published_edit', 'post_id' => $post_id ) );
+            self::redirect_notice( 'production_only', array( 'pnw_view' => 'published' ) );
         }
 
+        self::archive_post( $post_id );
+    }
+
+    public static function restore_archived_news(): void {
+        self::require_access();
+        check_admin_referer( 'pnw_restore_archived_news', 'pnw_nonce' );
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        $post    = self::archived_post( $post_id );
+        if ( ! $post ) {
+            wp_die( esc_html__( 'Az archivált hír nem található.', 'petrik-news-workflow' ), 404 );
+        }
+
+        $result = wp_update_post(
+            array(
+                'ID'          => $post_id,
+                'post_status' => 'publish',
+            ),
+            true
+        );
+
+        if ( is_wp_error( $result ) ) {
+            self::redirect_notice( 'save_error', array( 'pnw_view' => 'archive' ) );
+        }
+
+        PNW_Audit::log( $post_id, 'published_restored', PNW_Statuses::ARCHIVED, 'publish', 'Archivált hír visszaállítva és újra publikálva a Hírkezelőből.' );
+        delete_post_meta( $post_id, '_pnw_archived_at' );
+        delete_post_meta( $post_id, '_pnw_archived_by' );
+
+        self::redirect_notice( 'archived_restored', array( 'pnw_view' => 'archive' ) );
+    }
+
+    private static function archive_post( int $post_id ): void {
         $post = self::published_post( $post_id );
         if ( ! $post ) {
             wp_die( esc_html__( 'A publikált hír nem található.', 'petrik-news-workflow' ), 404 );
         }
 
-        PNW_Audit::log( $post_id, 'published_trashed', 'publish', 'trash', 'Publikált hír Lomtárba helyezve a Hírkezelőből.' );
-        $result = wp_trash_post( $post_id );
-        if ( ! $result ) {
-            self::redirect_notice( 'save_error', array( 'pnw_view' => 'published_edit', 'post_id' => $post_id ) );
+        update_post_meta( $post_id, '_pnw_archived_at', current_time( 'mysql' ) );
+        update_post_meta( $post_id, '_pnw_archived_by', get_current_user_id() );
+
+        $result = wp_update_post(
+            array(
+                'ID'          => $post_id,
+                'post_status' => PNW_Statuses::ARCHIVED,
+            ),
+            true
+        );
+
+        if ( is_wp_error( $result ) ) {
+            self::redirect_notice( 'save_error', array( 'pnw_view' => 'published' ) );
         }
 
-        self::redirect_notice( 'published_trashed', array( 'pnw_view' => 'published' ) );
+        PNW_Audit::log( $post_id, 'published_archived', 'publish', PNW_Statuses::ARCHIVED, 'Publikált hír archiválva és levéve a nyilvános weboldalról.' );
+        self::redirect_notice( 'published_archived', array( 'pnw_view' => 'published' ) );
     }
 
     private static function require_access(): void {
@@ -96,6 +153,14 @@ final class PNW_Published_Actions {
     private static function published_post( int $post_id ): ?WP_Post {
         $post = get_post( $post_id );
         if ( ! $post || 'post' !== $post->post_type || 'publish' !== $post->post_status ) {
+            return null;
+        }
+        return $post;
+    }
+
+    private static function archived_post( int $post_id ): ?WP_Post {
+        $post = get_post( $post_id );
+        if ( ! $post || 'post' !== $post->post_type || PNW_Statuses::ARCHIVED !== $post->post_status ) {
             return null;
         }
         return $post;
