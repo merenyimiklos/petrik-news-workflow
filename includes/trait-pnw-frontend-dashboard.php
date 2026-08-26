@@ -24,6 +24,7 @@ trait PNW_Frontend_Dashboard_Trait {
             'draft'                => self::count_posts( array( 'author' => $user_id, 'post_status' => 'draft' ) ),
             'pending'              => self::count_posts( array( 'author' => $user_id, 'post_status' => 'pending' ) ),
             PNW_Statuses::REVISION => self::count_posts( array( 'author' => $user_id, 'post_status' => PNW_Statuses::REVISION ) ),
+            'future'               => self::count_posts( array( 'author' => $user_id, 'post_status' => 'future' ) ),
             'publish'              => self::count_posts( array( 'author' => $user_id, 'post_status' => 'publish' ) ),
         );
 
@@ -60,12 +61,14 @@ trait PNW_Frontend_Dashboard_Trait {
             )
         );
 
-        $returned = self::count_posts( array( 'post_status' => PNW_Statuses::REVISION ) );
+        $returned  = self::count_posts( array( 'post_status' => PNW_Statuses::REVISION ) );
+        $scheduled = self::count_posts( array( 'post_status' => 'future' ) );
         $today     = self::published_today_count();
 
         echo '<div class="pnw-stats">';
         self::stat_card( count( $pending ), 'Jóváhagyásra vár', 'pending' );
         self::stat_card( $returned, 'Javításra visszaküldve', PNW_Statuses::REVISION );
+        self::stat_card( $scheduled, 'Időzített', 'future' );
         self::stat_card( $today, 'Ma publikálva', 'publish' );
         echo '</div>';
 
@@ -83,7 +86,7 @@ trait PNW_Frontend_Dashboard_Trait {
                 )
             );
 
-            echo '<div class="pnw-table-card"><div class="pnw-card-heading"><div><h4>Saját piszkozatok és javítások</h4><p>Az admin tesztfiókkal készített, még be nem küldött hírek.</p></div><a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a></div>';
+            echo '<div class="pnw-table-card"><div class="pnw-card-heading"><div><h4>Saját piszkozatok és javítások</h4><p>A még be nem küldött vagy javításra visszaküldött hírek.</p></div><a class="pnw-button" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a></div>';
             self::render_posts_table( $own_working, false );
             echo '</div>';
         }
@@ -92,12 +95,29 @@ trait PNW_Frontend_Dashboard_Trait {
         self::render_posts_table( $pending, true );
         echo '</div>';
 
+        $scheduled_posts = get_posts(
+            array(
+                'post_type'      => 'post',
+                'meta_key'       => '_pnw_managed',
+                'meta_value'     => '1',
+                'post_status'    => 'future',
+                'posts_per_page' => 10,
+                'orderby'        => 'date',
+                'order'          => 'ASC',
+            )
+        );
+        if ( ! empty( $scheduled_posts ) ) {
+            echo '<div class="pnw-table-card"><div class="pnw-card-heading"><div><h4>Következő időzített hírek</h4><p>A WordPress automatikusan publikálja őket a megadott időpontban.</p></div></div>';
+            self::render_posts_table( $scheduled_posts, true );
+            echo '</div>';
+        }
+
         $recent = get_posts(
             array(
                 'post_type'      => 'post',
                 'meta_key'       => '_pnw_managed',
                 'meta_value'     => '1',
-                'post_status'    => array( 'publish', PNW_Statuses::REVISION, PNW_Statuses::TEST_APPROVED ),
+                'post_status'    => array( 'publish', 'future', PNW_Statuses::REVISION, PNW_Statuses::TEST_APPROVED ),
                 'posts_per_page' => 10,
                 'orderby'        => 'modified',
                 'order'          => 'DESC',
@@ -126,15 +146,19 @@ trait PNW_Frontend_Dashboard_Trait {
             return;
         }
 
-        echo '<div class="pnw-table-wrap"><table class="pnw-table"><thead><tr><th>Hír</th><th>Beküldő</th><th>Állapot</th><th>Módosítva</th><th></th></tr></thead><tbody>';
+        echo '<div class="pnw-table-wrap"><table class="pnw-table"><thead><tr><th>Hír</th><th>Beküldő</th><th>Állapot</th><th>Módosítva / megjelenés</th><th></th></tr></thead><tbody>';
         foreach ( $posts as $post ) {
             $author = get_userdata( (int) $post->post_author );
             $status = $post->post_status;
+            $date   = 'future' === $status
+                ? 'Megjelenés: ' . get_the_date( 'Y.m.d. H:i', $post )
+                : get_the_modified_date( 'Y.m.d. H:i', $post );
+
             echo '<tr>';
             echo '<td><strong>' . esc_html( $post->post_title ?: '(Névtelen hír)' ) . '</strong><small>' . esc_html( self::category_names( (int) $post->ID ) ) . '</small></td>';
             echo '<td>' . esc_html( $author ? $author->display_name : '—' ) . '</td>';
             echo '<td><span class="pnw-badge pnw-badge-' . esc_attr( PNW_Statuses::css_class( $status ) ) . '">' . esc_html( PNW_Statuses::label( $status ) ) . '</span></td>';
-            echo '<td>' . esc_html( get_the_modified_date( 'Y.m.d. H:i', $post ) ) . '</td>';
+            echo '<td>' . esc_html( $date ) . '</td>';
             echo '<td class="pnw-actions">';
 
             if ( $reviewer && 'pending' === $status ) {
@@ -143,11 +167,11 @@ trait PNW_Frontend_Dashboard_Trait {
                 $label = PNW_Statuses::REVISION === $status ? 'Módosítás' : 'Szerkesztés';
                 echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">' . esc_html( $label ) . '</a>';
             } elseif ( PNW_Statuses::REVISION === $status && (int) $post->post_author === get_current_user_id() && current_user_can( 'pnw_submit_news' ) ) {
-                echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) ) . '">Módosítás</a>';
+                echo '<a class="pnw-button pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'edit', 'post_id' => $post->ID ) ) . '">Módosítás</a>';
             } elseif ( 'publish' === $status ) {
                 echo '<a class="pnw-button pnw-button-secondary pnw-button-small" href="' . esc_url( get_permalink( $post ) ) . '" target="_blank" rel="noopener">Megnyitás</a>';
             } elseif ( PNW_Access::can_view_workflow_post( (int) $post->ID ) ) {
-                echo '<a class="pnw-button pnw-button-secondary pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'review', 'post_id' => $post->ID ) ) ) . '">Részletek</a>';
+                echo '<a class="pnw-button pnw-button-secondary pnw-button-small" href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'review', 'post_id' => $post->ID ) ) . '">Részletek</a>';
             }
 
             echo '</td></tr>';
