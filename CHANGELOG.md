@@ -1,6 +1,44 @@
 # Changelog
 
-## 1.0.9-test - 2026-08-25
+## 1.1.0 - 2026-08-26
+
+- A plugin production módba került: `PNW_TEST_MODE` kikapcsolva.
+- A vezetői jóváhagyás után a workflow-val kezelt hír ténylegesen `publish` állapotba kerül és megjelenik a nyilvános oldalon.
+- A korábbi `pnw_test_ok` teszt-jóváhagyott hírek nem kerülnek automatikusan publikálásra.
+- Az MK-vezető, igazgatóhelyettes és igazgató szerepkörök a dedikált frontend Hírkezelőt használják; a normál wp-admin felület webadmin/adminisztrátor számára marad elérhető.
+- A frontend működéshez szükséges `admin-post.php`, AJAX és médiafeltöltési végpontok továbbra is engedélyezettek.
+- A Hírkezelő productionben is `noindex, nofollow`, no-cache védelmet kap, és nem jelenik meg a publikus WordPress navigációban.
+- A publikált hírek kezelőfelületén a régi és új hírek szerkeszthetők, illetve Lomtárba helyezhetők a megfelelő vezetői jogosultsággal.
+- A GitHub-alapú natív WordPress updater marad az éles frissítési csatorna.
+
+## 1.0.19-test - 2026-08-26
+
+- A Hírkezelő TinyMCE eszköztárából eltávolítva a hibás link beszúrása és link törlése gomb.
+
+## 1.0.18-test - 2026-08-26
+
+- A Hírkezelő TinyMCE eszköztárából eltávolítva a Divi/téma stílusaival összeakadó teljes képernyős gomb.
+
+## 1.0.17-test - 2026-08-26
+
+- A táblázat- és kategóriaablak műveleti gombjai stabil, jól látható elrendezést kaptak.
+
+## 1.0.16-test - 2026-08-26
+
+- Vizuális **Táblázat beszúrása** funkció került a hírszerkesztőbe sor-/oszlopszám, fejlécsor és opcionális cím megadásával.
+- Új kategória hozható létre közvetlenül a Hírkezelőből oldal-újratöltés nélkül, opcionális szülőkategóriával.
+- Az új kategória létrehozás után automatikusan kiválasztásra kerül.
+
+## 1.0.15-test - 2026-08-26
+
+- A **Kint lévő hírek** műveleti gombjai külön, teljes szélességű sorba kerültek a jobb oldali levágás megszüntetésére.
+
+## 1.0.13-test - 2026-08-26
+
+- Új **Kint lévő hírek** felület az összes publikált WordPress-bejegyzéshez, beleértve a plugin előtti híreket is.
+- Production módban szerkesztés és Lomtárba helyezés támogatása vezetői jogosultsággal.
+
+## 1.0.9-test - 2026-08-24
 
 - Beépített GitHub-alapú natív WordPress frissítő került a pluginba.
 - A plugin az `update.json` manifestet ellenőrzi a GitHub deployment branch-en.
@@ -9,13 +47,12 @@
 - A frissítéshez nincs szükség GitHub tokenre vagy fizetős WordPress pluginra, mert a repository publikus.
 - Ettől a verziótól a további fejlesztésekhez nem kell kézzel új ZIP-et feltölteni a WordPressbe.
 
-## 1.0.8-test - 2026-08-25
+## 1.0.8-test - 2026-08-24
 
-- Az MK-vezető belépése most valódi WordPress munkamenetet hoz létre (`wp_set_auth_cookie`), ugyanúgy, mint egy normál WordPress belépés.
-- A hitelesítés a WordPress saját jelszóhash-ellenőrzését használja, de nem engedi, hogy egy külső role-based login filter blokkolja a Petrik saját szerepköreit.
+- Az MK-vezető belépése valódi WordPress munkamenetet hoz létre (`wp_set_auth_cookie`).
 - A munkaközösség-vezető szerepkör Contributor-kompatibilis alapjogokat kap (`read`, `edit_posts`, `delete_posts`, `level_0`, `level_1`) + képfeltöltés + `pnw_submit_news`.
 - Az MK-vezető továbbra sem kap `publish_posts`, `edit_others_posts`, adminisztrátori vagy workflow-jóváhagyási jogot.
-- Sikeres WordPress belépés után az MK-vezetőt a plugin továbbra is automatikusan a Hírkezelőbe irányítja, a `/wp-admin` felület helyett.
+- Sikeres WordPress belépés után az MK-vezetőt a plugin automatikusan a Hírkezelőbe irányítja.
 
 ## 1.0.6-test - 2026-08-24
 
@@ -33,19 +70,16 @@
 
 ## 1.0.4-test - 2026-08-24
 
-- A vezetői részletező nézetben is megjelenik a **Hír módosítása** gomb, ha a visszaküldött hírt olyan felhasználó nézi, akinek híríró jogosultsága is van (pl. admin tesztfiók).
+- A vezetői részletező nézetben is megjelenik a **Hír módosítása** gomb, ha a visszaküldött hírt olyan felhasználó nézi, akinek híríró jogosultsága is van.
 - A valódi igazgatóhelyettes/igazgató továbbra sem kap híríró jogosultságot, így a javítás az MK-vezető feladata marad.
 
 ## 1.0.3-test - 2026-08-24
 
 - A javításra visszaküldött híreknél egyértelmű **Módosítás / Hír módosítása** művelet került a felületre.
-- Javítás után a fő művelet neve **Újraküldés jóváhagyásra**, így a teljes visszaküldés → javítás → újraellenőrzés workflow egyértelmű.
-- A hírszöveg szerkesztője letisztult, csak vizuális szerkesztési módot használ; a technikai Kód/Quicktags/„tagek lezárása” elemek eltűntek.
-- Egyszerűbb TinyMCE eszköztár: címsor, félkövér/dőlt, listák, idézet, igazítás, link, visszavonás, formázás törlése és teljes képernyő.
-- Új **Gyors előnézet** popup a még el nem mentett cím, kategóriák, kivonat, formázott hírszöveg és kiemelt kép megtekintéséhez.
-- A kiválasztott kiemelt kép már feltöltés előtt azonnal előnézhető.
-- A vezetői szerkesztőben külön gyors előnézet és külön WordPress/Divi weboldal-előnézet érhető el.
-- Asset verzió emelve, hogy a WordPress/böngésző cache biztosan az új CSS/JS fájlokat töltse be.
+- Javítás után a fő művelet neve **Újraküldés jóváhagyásra**.
+- A hírszöveg szerkesztője letisztult, csak vizuális szerkesztési módot használ.
+- Új **Gyors előnézet** popup a még el nem mentett tartalomhoz.
+- A kiválasztott kiemelt kép feltöltés előtt azonnal előnézhető.
 
 ## 1.0.1-test - 2026-08-24
 
@@ -54,8 +88,6 @@
 - A plugin által kezelt hír TEST MODE-ban sem a Hírkezelőből, sem wp-admin/REST útvonalon nem kerülhet `publish`, `future` vagy `private` állapotba.
 - Új, nem publikus `pnw_test_ok` státusz a teszt-jóváhagyásokhoz.
 - A Hírkezelő TEST MODE bannerrel jelzi a publikálási tiltást.
-- A jóváhagyó gomb és az e-mail értesítések tesztüzemben egyértelműen jelzik, hogy nem történt publikálás.
-- A Hírkezelő oldal `noindex, nofollow` és no-cache fejléceket kap tesztmódban.
 - GitHub Actions PHP lint célverzió PHP 7.4.
 
 ## 1.0.0 - 2026-08-18
@@ -72,4 +104,3 @@
 - Audit napló.
 - Biztonsági korlátozások az illetéktelen publikálás ellen.
 - GitHub Actions PHP syntax lint.
-- Telepítési, biztonsági és tesztelési dokumentáció.
