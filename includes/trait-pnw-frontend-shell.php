@@ -59,6 +59,9 @@ trait PNW_Frontend_Shell_Trait {
             case 'archive':
                 self::render_archived_news();
                 break;
+            case 'stats':
+                PNW_Statistics::render();
+                break;
             case 'audit':
                 self::render_audit();
                 break;
@@ -130,11 +133,12 @@ trait PNW_Frontend_Shell_Trait {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'new' ) ) ) . '">+ Új hír</a>';
         }
         if ( current_user_can( 'pnw_manage_published_news' ) ) {
-            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published' ) ) ) . '">Kint lévő hírek</a>';
-            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'archive' ) ) ) . '">Archívum</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published' ) ) . '">Kint lévő hírek</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'archive' ) ) . '">Archívum</a>';
         }
         if ( current_user_can( 'pnw_view_audit_log' ) ) {
-            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) ) . '">Napló</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'stats' ) ) . '">Statisztika</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) . '">Napló</a>';
         }
         echo '<a class="pnw-nav-spacer" href="' . esc_url( wp_logout_url( home_url( '/' ) ) ) . '">Kijelentkezés</a>';
         echo '</nav>';
@@ -163,6 +167,8 @@ trait PNW_Frontend_Shell_Trait {
             'submitted'               => array( 'success', 'A hír jóváhagyásra elküldve.' ),
             'review_saved'            => array( 'success', 'A vezetői módosítások mentve.' ),
             'approved'                => array( 'success', $approved_message ),
+            'scheduled'               => array( 'success', 'A hír jóváhagyva és időzítve. A megadott időpontban automatikusan megjelenik.' ),
+            'schedule_invalid'        => array( 'error', 'Az időzített publikáláshoz adj meg egy érvényes, jövőbeli időpontot.' ),
             'rejected'                => array( 'warning', 'A hír javításra visszaküldve.' ),
             'trashed'                 => array( 'success', 'A piszkozat a lomtárba került.' ),
             'published_updated'       => array( 'success', 'A publikált hír módosításai elmentve.' ),
