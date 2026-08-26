@@ -82,4 +82,35 @@ final class PNW_Notifications {
 
         wp_mail( $author->user_email, $subject, $body );
     }
+
+    public static function scheduled( int $post_id, string $publish_at ): void {
+        $post   = get_post( $post_id );
+        $author = $post ? get_userdata( (int) $post->post_author ) : false;
+        if ( ! $post || ! $author || ! is_email( $author->user_email ) ) {
+            return;
+        }
+
+        $subject = sprintf( '[Petrik Hírkezelő] Jóváhagyva és időzítve: %s', wp_strip_all_tags( $post->post_title ) );
+        $body    = "A hírt a vezetőség jóváhagyta és időzítette.\n\n";
+        $body   .= 'Cím: ' . wp_strip_all_tags( $post->post_title ) . "\n";
+        $body   .= 'Tervezett megjelenés: ' . $publish_at . "\n";
+        $body   .= 'Hírkezelő: ' . PNW_Plugin::manager_url( array( 'pnw_view' => 'review', 'post_id' => $post_id ) ) . "\n";
+
+        wp_mail( $author->user_email, $subject, $body );
+    }
+
+    public static function scheduled_published( int $post_id ): void {
+        $post   = get_post( $post_id );
+        $author = $post ? get_userdata( (int) $post->post_author ) : false;
+        if ( ! $post || ! $author || ! is_email( $author->user_email ) ) {
+            return;
+        }
+
+        $subject = sprintf( '[Petrik Hírkezelő] Az időzített hír megjelent: %s', wp_strip_all_tags( $post->post_title ) );
+        $body    = "Az időzített hír automatikusan megjelent a Petrik weboldalán.\n\n";
+        $body   .= 'Cím: ' . wp_strip_all_tags( $post->post_title ) . "\n";
+        $body   .= 'Hír: ' . get_permalink( $post_id ) . "\n";
+
+        wp_mail( $author->user_email, $subject, $body );
+    }
 }
