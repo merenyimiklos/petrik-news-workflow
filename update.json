@@ -1,8 +1,8 @@
 {
-  "version": "1.0.18-test",
+  "version": "1.0.19-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Szerkesztő stabilitási javítás: a Hírkezelő vizuális szerkesztőjéből eltávolítottuk a TinyMCE teljes képernyős gombját, mert a Divi/téma stílusaival ütközve fehér, használhatatlan nézetet eredményezett. A változás csak a Hírkezelő szerkesztőjét érinti."
+  "changelog": "Szerkesztő stabilitási javítás: a Hírkezelő vizuális szerkesztőjéből eltávolítottuk a hibás link beszúrása és link törlése gombokat. Ezek a frontendes TinyMCE nézetben az oldal aljára ugrást okoztak. A korábban problémás teljes képernyős gomb sincs már a toolbaron."
 }
