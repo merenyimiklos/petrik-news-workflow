@@ -1,8 +1,8 @@
 {
-  "version": "1.1.0",
+  "version": "1.1.1",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Első production kiadás. A vezetői jóváhagyás után a workflow-hír ténylegesen publikálódik. Az MK-vezető, igazgatóhelyettes és igazgató a frontend Hírkezelőt használja, a normál wp-admin webadminnak marad. A Hírkezelő productionben is noindex/no-cache és rejtve marad a publikus navigációból. A korábbi teszt-jóváhagyott hírek nem publikálódnak automatikusan."
+  "changelog": "Publikált hírek visszaállítható archiválása. A Kint lévő hírek listában piros Archiválás gomb jelent meg: a hír azonnal eltűnik a nyilvános oldalról, de nem törlődik. Új Archívum nézetből egy kattintással visszaállítható és újrapublikálható. Az archiválás és visszaállítás auditnaplóba kerül; a régi Lomtár végpont is biztonságosan archiválásra lett átirányítva."
 }
