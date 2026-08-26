@@ -15,6 +15,7 @@ final class PNW_UX {
     public static function init(): void {
         add_action( 'wp_ajax_pnw_autosave_news', array( __CLASS__, 'autosave_news' ) );
         add_action( 'wp_ajax_pnw_reset_draft', array( __CLASS__, 'reset_draft' ) );
+        add_action( 'wp_ajax_pnw_delete_draft', array( __CLASS__, 'delete_draft' ) );
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ), 40 );
     }
 
@@ -63,6 +64,7 @@ final class PNW_UX {
                 'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
                 'autosaveNonce'    => wp_create_nonce( 'pnw_autosave_news' ),
                 'resetNonce'       => wp_create_nonce( 'pnw_reset_draft' ),
+                'deleteDraftNonce' => wp_create_nonce( 'pnw_delete_draft' ),
                 'autosaveInterval' => 30000,
                 'userId'           => get_current_user_id(),
                 'managerUrl'       => PNW_Plugin::manager_url(),
@@ -89,9 +91,6 @@ final class PNW_UX {
             : array();
         $categories = array_values( array_intersect( $categories, PNW_Access::allowed_category_ids() ) );
 
-        // A server-side WordPress draft is only created once a real category is
-        // selected. Before that the browser-side safety copy keeps the text, so
-        // WordPress cannot silently assign its default category.
         if ( empty( $categories ) ) {
             wp_send_json_error(
                 array(
@@ -189,13 +188,38 @@ final class PNW_UX {
             wp_send_json_error( array( 'message' => 'A piszkozat kiürítése most nem sikerült.' ), 500 );
         }
 
-        // A Tiszta lap valóban üres szerkesztési állapotot ad. A médiatárban lévő
-        // fájlt nem töröljük, csak leválasztjuk erről a piszkozatról.
         wp_set_object_terms( $post_id, array(), 'category' );
         delete_post_thumbnail( $post_id );
         delete_post_meta( $post_id, '_pnw_review_note' );
         delete_post_meta( $post_id, '_pnw_autosaved_at' );
         PNW_Audit::log( $post_id, 'draft_reset', 'draft', 'draft', 'A szerző tiszta lappal újrakezdte a piszkozatot.' );
+
+        wp_send_json_success( array( 'postId' => $post_id ) );
+    }
+
+    public static function delete_draft(): void {
+        if ( ! is_user_logged_in() || ! current_user_can( 'pnw_submit_news' ) ) {
+            wp_send_json_error( array( 'message' => 'Nincs jogosultságod a piszkozat törléséhez.' ), 403 );
+        }
+
+        check_ajax_referer( 'pnw_delete_draft', 'nonce' );
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        $post    = $post_id ? get_post( $post_id ) : null;
+
+        if ( ! $post || 'post' !== $post->post_type || 'draft' !== $post->post_status ) {
+            wp_send_json_error( array( 'message' => 'Csak még be nem küldött piszkozat törölhető innen.' ), 409 );
+        }
+
+        if ( ! PNW_Access::can_edit_workflow_post( $post_id ) ) {
+            wp_send_json_error( array( 'message' => 'Ezt a piszkozatot nem törölheted.' ), 403 );
+        }
+
+        PNW_Audit::log( $post_id, 'trashed', 'draft', 'trash', 'A szerző a piszkozatlistából törölte.' );
+        $deleted = wp_trash_post( $post_id );
+        if ( ! $deleted ) {
+            wp_send_json_error( array( 'message' => 'A piszkozat törlése most nem sikerült.' ), 500 );
+        }
 
         wp_send_json_success( array( 'postId' => $post_id ) );
     }
