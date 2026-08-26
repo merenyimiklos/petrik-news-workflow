@@ -56,6 +56,9 @@ trait PNW_Frontend_Shell_Trait {
             case 'published_edit':
                 self::render_published_editor( isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0 );
                 break;
+            case 'archive':
+                self::render_archived_news();
+                break;
             case 'audit':
                 self::render_audit();
                 break;
@@ -128,6 +131,7 @@ trait PNW_Frontend_Shell_Trait {
         }
         if ( current_user_can( 'pnw_manage_published_news' ) ) {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'published' ) ) ) . '">Kint lévő hírek</a>';
+            echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'archive' ) ) ) . '">Archívum</a>';
         }
         if ( current_user_can( 'pnw_view_audit_log' ) ) {
             echo '<a href="' . esc_url( PNW_Plugin::manager_url( array( 'pnw_view' => 'audit' ) ) ) . '">Napló</a>';
@@ -162,8 +166,10 @@ trait PNW_Frontend_Shell_Trait {
             'rejected'                => array( 'warning', 'A hír javításra visszaküldve.' ),
             'trashed'                 => array( 'success', 'A piszkozat a lomtárba került.' ),
             'published_updated'       => array( 'success', 'A publikált hír módosításai elmentve.' ),
-            'published_trashed'       => array( 'success', 'A publikált hír a Lomtárba került és lekerült a weboldalról.' ),
-            'production_only'         => array( 'warning', 'A meglévő publikus hírek módosítása és törlése TEST MODE-ban biztonsági okból le van tiltva.' ),
+            'published_archived'      => array( 'success', 'A hír archiválva. Le került a nyilvános weboldalról, de az Archívumból bármikor visszaállítható.' ),
+            'archived_restored'       => array( 'success', 'Az archivált hír visszaállítva és újra publikálva.' ),
+            'published_trashed'       => array( 'success', 'A hír archiválva és levéve a nyilvános weboldalról.' ),
+            'production_only'         => array( 'warning', 'A meglévő publikus hírek módosítása és archiválása TEST MODE-ban biztonsági okból le van tiltva.' ),
             'missing_fields'          => array( 'error', 'A cím és a hír szövege kötelező.' ),
             'category_required'       => array( 'error', 'Legalább egy kategóriát válassz.' ),
             'rejection_note_required' => array( 'error', 'Visszaküldésnél kötelező megjegyzést írni.' ),
