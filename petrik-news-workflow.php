@@ -3,7 +3,7 @@
  * Plugin Name: Petrik News Workflow
  * Plugin URI:  https://github.com/merenyimiklos/petrik-news-workflow
  * Description: Belső hírbeküldési és vezetői jóváhagyási workflow a Petrik WordPress oldalához.
- * Version:     1.1.2
+ * Version:     1.2.0
  * Author:      Petrik
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -16,12 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'PNW_VERSION', '1.1.2' );
+define( 'PNW_VERSION', '1.2.0' );
 define( 'PNW_FILE', __FILE__ );
 define( 'PNW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PNW_URL', plugin_dir_url( __FILE__ ) );
 
-// Production mode: approved workflow news may now become public.
+// Production mode: approved workflow news may become public or be scheduled.
 define( 'PNW_TEST_MODE', false );
 
 require_once PNW_DIR . 'includes/class-pnw-roles.php';
@@ -33,6 +33,8 @@ require_once PNW_DIR . 'includes/class-pnw-access.php';
 require_once PNW_DIR . 'includes/class-pnw-actions.php';
 require_once PNW_DIR . 'includes/class-pnw-published-actions.php';
 require_once PNW_DIR . 'includes/class-pnw-editor-tools.php';
+require_once PNW_DIR . 'includes/class-pnw-ux.php';
+require_once PNW_DIR . 'includes/class-pnw-statistics.php';
 require_once PNW_DIR . 'includes/class-pnw-frontend-login.php';
 require_once PNW_DIR . 'includes/class-pnw-updater.php';
 require_once PNW_DIR . 'includes/class-pnw-frontend.php';
@@ -44,6 +46,7 @@ PNW_Frontend_Login::init();
 PNW_Updater::init();
 PNW_Published_Actions::init();
 PNW_Editor_Tools::init();
+PNW_UX::init();
 
 register_activation_hook( __FILE__, array( 'PNW_Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'PNW_Plugin', 'deactivate' ) );
