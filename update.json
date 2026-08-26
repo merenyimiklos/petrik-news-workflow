@@ -1,8 +1,8 @@
 {
-  "version": "1.0.17-test",
+  "version": "1.0.18-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Táblázat- és kategóriaablak gombjavítás: a Mégse és a fő műveleti gomb stabil, teljes szélességű kéthasábos gombsávot kapott. A Táblázat beszúrása és Kategória létrehozása gomb erős kék primary stílussal, kényszerített láthatósággal jelenik meg, így Divi/tema CSS sem tudja eltüntetni vagy kilökni az ablakból. Mobilon a gombok egymás alá rendeződnek."
+  "changelog": "Szerkesztő stabilitási javítás: a Hírkezelő vizuális szerkesztőjéből eltávolítottuk a TinyMCE teljes képernyős gombját, mert a Divi/téma stílusaival ütközve fehér, használhatatlan nézetet eredményezett. A változás csak a Hírkezelő szerkesztőjét érinti."
 }
