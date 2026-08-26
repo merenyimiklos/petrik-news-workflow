@@ -3,7 +3,7 @@ Contributors: petrik
 Tags: editorial workflow, approval, news, school
 Requires at least: 6.4
 Requires PHP: 7.4
-Stable tag: 1.0.9-test
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,9 +11,11 @@ Belső hírbeküldési és vezetői jóváhagyási workflow a Petrik WordPress o
 
 == Description ==
 
-A plugin a WordPress szabványos bejegyzéseit használja. Munkaközösség-vezetők hírt készíthetnek és beküldhetik vezetői jóváhagyásra, de nem publikálhatnak. Igazgatóhelyettes vagy igazgató szerkesztheti, jóváhagyhatja és publikálhatja a hírt, vagy indoklással visszaküldheti javításra.
+A plugin a WordPress szabványos bejegyzéseit használja. Munkaközösség-vezetők hírt készíthetnek és beküldhetik vezetői jóváhagyásra, de közvetlenül nem publikálhatnak. Igazgatóhelyettes vagy igazgató szerkesztheti, jóváhagyhatja és publikálhatja a hírt, vagy indoklással visszaküldheti javításra.
 
-A tesztcsomagban hard safety TEST MODE aktív: a plugin által kezelt hír sem a Hírkezelőből, sem wp-admin/REST kerülőúton nem tehető publikus, privát vagy időzített állapotba. A jóváhagyás `pnw_test_ok` tesztstátuszt rögzít, ezért a hír nem jelenik meg a nyilvános Petrik oldalon.
+Az 1.1.0 verzió production módú kiadás: a Hírkezelőben jóváhagyott hír ténylegesen `publish` állapotba kerül és megjelenik a nyilvános weboldalon. A korábbi teszt-jóváhagyott hírek nem kerülnek automatikusan publikálásra.
+
+A Hírkezelő továbbra is belső alkalmazásoldal: noindex/no-cache védelemmel működik, és nem jelenik meg a nyilvános navigációban. A Petrik saját workflow szerepkörei a Hírkezelőt használják; a normál wp-admin felület webadmin/adminisztrátor számára marad elérhető.
 
 Az 1.0.9-test verziótól a plugin saját GitHub-updaterrel rendelkezik. A további verziók a WordPress natív bővítményfrissítőjében jelennek meg; nincs szükség újabb kézi ZIP-feltöltésre.
 
@@ -23,26 +25,48 @@ Fő funkciók:
 * teljesen frontend belépés WPS Hide Login kompatibilitással;
 * MK-vezető / igazgatóhelyettes / igazgató szerepkörök;
 * szerepkör-capability automatikus javítás frissítés után;
-* pending review workflow;
-* visszaküldés javításra;
+* piszkozat → beküldés → vezetői jóváhagyás → publikálás workflow;
+* visszaküldés javításra vezetői megjegyzéssel;
 * e-mail értesítések;
 * kategória-korlátozás felhasználónként;
+* új kategória létrehozása közvetlenül a Hírkezelőből;
+* vizuális táblázatbeszúrás nem technikai felhasználóknak;
+* kiemelt kép és gyors előnézet;
+* publikált és korábbi WordPress hírek szerkesztése / Lomtárba helyezése vezetői jogosultsággal;
 * audit napló;
-* admin tesztfiók saját piszkozatainak külön listázása;
-* hard test-mode publikálásvédelem;
 * GitHub-alapú natív WordPress frissítés;
 * nincs fizetős pluginfüggőség.
 
 == Installation ==
 
-1. Az 1.0.9-test bootstrap verziót töltsd fel ZIP-ként és cseréld le vele a korábbi verziót.
-2. Aktiváld / hagyd aktívan a bővítményt.
-3. Rendeld hozzá a megfelelő felhasználói szerepköröket.
-4. Nyisd meg a `/hirkezelo/` oldalt.
-5. Tesztverziónál ellenőrizd, hogy a TESZT MÓD banner látható.
-6. Ettől kezdve az új verziók a WordPress Bővítmények / Frissítések felületén jelennek meg.
+1. Aktiváld / hagyd aktívan a bővítményt.
+2. Rendeld hozzá a megfelelő felhasználói szerepköröket.
+3. Nyisd meg a `/hirkezelo/` oldalt.
+4. A további verziók a WordPress Bővítmények / Frissítések felületén jelennek meg.
 
 == Changelog ==
+
+= 1.1.0 =
+* Production mód: jóváhagyás után a hír ténylegesen publikálódik.
+* A Hírkezelő noindex/no-cache és nyilvános menüből rejtett marad.
+* MK-vezető, igazgatóhelyettes és igazgató frontend-only workflow szerepkörként működik; a wp-admin webadminnak marad.
+* A korábbi teszt-jóváhagyott hírek nem kerülnek automatikusan publikálásra.
+
+= 1.0.19-test =
+* Hibás TinyMCE link/linktörlés gombok eltávolítva a Hírkezelőből.
+
+= 1.0.18-test =
+* Hibás TinyMCE teljes képernyős gomb eltávolítva.
+
+= 1.0.16-test =
+* Vizuális táblázatbeszúrás.
+* Új kategória létrehozása oldal-újratöltés nélkül.
+
+= 1.0.15-test =
+* Kint lévő hírek műveleteinek reszponzív elrendezése.
+
+= 1.0.13-test =
+* Kint lévő hírek felület a korábbi WordPress hírekkel együtt.
 
 = 1.0.9-test =
 * GitHub-alapú natív WordPress updater.
@@ -73,7 +97,6 @@ Fő funkciók:
 * PHP 7.4 kompatibilitási cél a jelenlegi Petrik tárhelyhez.
 * Hard TEST MODE: kezelt hír nem publikálható.
 * Teszt-jóváhagyási státusz, noindex/no-cache védelem a Hírkezelőn.
-* Tesztmódhoz igazított felületi és e-mail üzenetek.
 
 = 1.0.0 =
 * Első működő verzió.
