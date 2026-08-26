@@ -1,8 +1,8 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Hírsablonok design-frissítés: a sablonválasztó teljes szélességű sort kapott, így nem zsugorodik egy kis nyílra; alatta külön, jól látható gombok jelennek meg. A Sablon alkalmazása erős kék primary gomb, a Tiszta lap kontrasztos másodlagos gomb, inaktív állapotban is olvasható. Mobilon a vezérlők automatikusan egymás alá rendeződnek."
+  "changelog": "Egyedi Petrik-stílusú popup rendszer: a piszkozat törlése, Tiszta lap, sabloncsere, archiválás, visszaállítás és a kapcsolódó hibaüzenetek már nem a böngésző alapértelmezett confirm/alert ablakait használják. A veszélyes műveletek piros, a visszaállítás zöld, az információs és sablonműveletek kék/sárga egyedi modalt kapnak; sötétített háttérrel, saját gombokkal, mobilbarát nézettel, Escape- és billentyűzet-kezeléssel. Az időzített publikálás datetime-local formátuma is pontosítva lett."
 }
