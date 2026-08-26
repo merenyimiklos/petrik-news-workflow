@@ -1,8 +1,8 @@
 {
-  "version": "1.0.16-test",
+  "version": "1.0.17-test",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Felhasználóbarát szerkesztőbővítés: vizuális Táblázat beszúrása eszköz sor- és oszlopszám, opcionális cím és fejlécsor megadásával; a cellák ezután közvetlenül szerkeszthetők. A Kategóriák résznél új + Új kategória ablak került be, amely oldal-újratöltés nélkül létrehozza és automatikusan ki is választja az új kategóriát, opcionális szülőkategóriával. Kifejezetten nem technikai MK-vezetők egyszerű használatára kialakítva."
+  "changelog": "Táblázat- és kategóriaablak gombjavítás: a Mégse és a fő műveleti gomb stabil, teljes szélességű kéthasábos gombsávot kapott. A Táblázat beszúrása és Kategória létrehozása gomb erős kék primary stílussal, kényszerített láthatósággal jelenik meg, így Divi/tema CSS sem tudja eltüntetni vagy kilökni az ablakból. Mobilon a gombok egymás alá rendeződnek."
 }
