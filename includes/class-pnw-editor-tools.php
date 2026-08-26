@@ -26,6 +26,21 @@ final class PNW_Editor_Tools {
                 PNW_VERSION
             );
 
+            wp_enqueue_style(
+                'pnw-validation',
+                PNW_URL . 'assets/css/pnw-validation.css',
+                array( 'pnw-app', 'pnw-editor-tools' ),
+                PNW_VERSION
+            );
+
+            wp_enqueue_script(
+                'pnw-validation',
+                PNW_URL . 'assets/js/pnw-validation.js',
+                array( 'pnw-app' ),
+                PNW_VERSION,
+                true
+            );
+
             if ( wp_script_is( 'pnw-app', 'registered' ) ) {
                 wp_localize_script(
                     'pnw-app',
