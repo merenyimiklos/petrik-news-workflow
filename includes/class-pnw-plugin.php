@@ -31,9 +31,10 @@ final class PNW_Plugin {
         // response headers protect the normal WordPress response as well.
         add_action( 'template_redirect', array( __CLASS__, 'protect_manager_cache' ), 0 );
 
-        if ( defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
-            add_filter( 'wp_nav_menu_objects', array( __CLASS__, 'hide_manager_page_from_menu' ), 999, 2 );
-        }
+        // The Hírkezelő is an internal application page in test and production
+        // alike. Keep it out of public navigation and search-engine indexing.
+        add_filter( 'wp_nav_menu_objects', array( __CLASS__, 'hide_manager_page_from_menu' ), 999, 2 );
+        add_filter( 'wp_robots', array( __CLASS__, 'manager_robots' ) );
     }
 
     public static function activate(): void {
@@ -42,7 +43,7 @@ final class PNW_Plugin {
         PNW_Statuses::register();
         $page_id = self::ensure_manager_page();
 
-        if ( $page_id && defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE ) {
+        if ( $page_id ) {
             self::remove_manager_page_from_saved_menus( $page_id );
         }
 
@@ -100,7 +101,18 @@ final class PNW_Plugin {
             header( 'Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0', true );
             header( 'Pragma: no-cache', true );
             header( 'Vary: Cookie', false );
+            header( 'X-Robots-Tag: noindex, nofollow', true );
         }
+    }
+
+    public static function manager_robots( array $robots ): array {
+        $page_id = absint( get_option( 'pnw_manager_page_id', 0 ) );
+        if ( $page_id > 0 && is_page( $page_id ) ) {
+            $robots['noindex']  = true;
+            $robots['nofollow'] = true;
+        }
+
+        return $robots;
     }
 
     public static function hide_manager_page_from_menu( array $items, $args ): array {
