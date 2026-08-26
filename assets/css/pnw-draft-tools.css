@@ -1,0 +1,38 @@
+.pnw-clean-slate-button {
+    white-space: nowrap;
+}
+
+.pnw-button-ghost {
+    background: transparent;
+    border: 1px solid rgba(20, 33, 61, 0.18);
+    color: inherit;
+}
+
+.pnw-button-ghost:hover,
+.pnw-button-ghost:focus {
+    background: rgba(20, 33, 61, 0.05);
+}
+
+.pnw-actions .pnw-delete-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.pnw-actions .pnw-delete-form .pnw-button {
+    margin: 0;
+}
+
+@media (max-width: 720px) {
+    .pnw-template-controls .pnw-clean-slate-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pnw-actions .pnw-delete-form {
+        width: 100%;
+    }
+
+    .pnw-actions .pnw-delete-form .pnw-button {
+        width: 100%;
+    }
+}
