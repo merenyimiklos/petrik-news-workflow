@@ -11,6 +11,7 @@ final class PNW_Actions {
         add_action( 'admin_post_pnw_review_news', array( __CLASS__, 'review_news' ) );
         add_action( 'admin_post_pnw_reviewer_save', array( __CLASS__, 'reviewer_save' ) );
         add_action( 'admin_post_pnw_delete_news', array( __CLASS__, 'delete_news' ) );
+        add_action( 'transition_post_status', array( __CLASS__, 'track_scheduled_publication' ), 10, 3 );
     }
 
     public static function frontend_login(): void {
@@ -166,10 +167,12 @@ final class PNW_Actions {
         self::require_login_and_cap( 'pnw_review_news' );
         check_admin_referer( 'pnw_review_news', 'pnw_nonce' );
 
-        $post_id  = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
-        $decision = isset( $_POST['decision'] ) ? sanitize_key( wp_unslash( $_POST['decision'] ) ) : '';
-        $note     = isset( $_POST['review_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['review_note'] ) ) : '';
-        $post     = get_post( $post_id );
+        $post_id      = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        $decision     = isset( $_POST['decision'] ) ? sanitize_key( wp_unslash( $_POST['decision'] ) ) : '';
+        $note         = isset( $_POST['review_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['review_note'] ) ) : '';
+        $publish_mode = isset( $_POST['publish_mode'] ) ? sanitize_key( wp_unslash( $_POST['publish_mode'] ) ) : 'now';
+        $publish_at   = isset( $_POST['publish_at'] ) ? sanitize_text_field( wp_unslash( $_POST['publish_at'] ) ) : '';
+        $post         = get_post( $post_id );
 
         if ( ! $post || 'post' !== $post->post_type || 'pending' !== $post->post_status || '1' !== (string) get_post_meta( $post_id, '_pnw_managed', true ) ) {
             wp_die( esc_html__( 'Ez a hír már nem vár jóváhagyásra.', 'petrik-news-workflow' ), 400 );
@@ -197,12 +200,31 @@ final class PNW_Actions {
             wp_die( esc_html__( 'Ismeretlen döntés.', 'petrik-news-workflow' ), 400 );
         }
 
+        $test_mode = defined( 'PNW_TEST_MODE' ) && PNW_TEST_MODE;
+        $scheduled = false;
+        $date      = null;
+        $target    = 'publish';
+        $local     = current_time( 'mysql' );
+        $gmt       = current_time( 'mysql', true );
+
+        if ( 'schedule' === $publish_mode && ! $test_mode ) {
+            $date = DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', $publish_at, wp_timezone() );
+            if ( ! $date || $date->getTimestamp() <= time() + 60 ) {
+                self::redirect_notice( 'schedule_invalid', array( 'pnw_view' => 'review', 'post_id' => $post_id ) );
+            }
+
+            $scheduled = true;
+            $target    = 'future';
+            $local     = $date->format( 'Y-m-d H:i:s' );
+            $gmt       = get_gmt_from_date( $local );
+        }
+
         $result = wp_update_post(
             array(
                 'ID'            => $post_id,
-                'post_status'   => 'publish',
-                'post_date'     => current_time( 'mysql' ),
-                'post_date_gmt' => current_time( 'mysql', true ),
+                'post_status'   => $target,
+                'post_date'     => $local,
+                'post_date_gmt' => $gmt,
             ),
             true
         );
@@ -213,9 +235,36 @@ final class PNW_Actions {
         delete_post_meta( $post_id, '_pnw_review_note' );
         update_post_meta( $post_id, '_pnw_last_reviewer', get_current_user_id() );
         update_post_meta( $post_id, '_pnw_last_reviewed_at', current_time( 'mysql' ) );
+
+        if ( $scheduled && $date instanceof DateTimeImmutable ) {
+            $display = wp_date( 'Y.m.d. H:i', $date->getTimestamp(), wp_timezone() );
+            update_post_meta( $post_id, '_pnw_scheduled_for', $local );
+            update_post_meta( $post_id, '_pnw_scheduled_by', get_current_user_id() );
+            PNW_Audit::log( $post_id, 'scheduled', 'pending', 'future', trim( $note . "\nPublikálás: " . $display ) );
+            PNW_Notifications::scheduled( $post_id, $display );
+            self::redirect_notice( 'scheduled' );
+        }
+
+        delete_post_meta( $post_id, '_pnw_scheduled_for' );
+        delete_post_meta( $post_id, '_pnw_scheduled_by' );
         PNW_Audit::log( $post_id, 'approved', 'pending', 'publish', $note );
         PNW_Notifications::approved( $post_id );
         self::redirect_notice( 'approved' );
+    }
+
+    public static function track_scheduled_publication( string $new_status, string $old_status, WP_Post $post ): void {
+        if ( 'future' !== $old_status || 'publish' !== $new_status || 'post' !== $post->post_type ) {
+            return;
+        }
+
+        if ( '1' !== (string) get_post_meta( $post->ID, '_pnw_managed', true ) ) {
+            return;
+        }
+
+        PNW_Audit::log( (int) $post->ID, 'scheduled_published', 'future', 'publish', 'Az időzített hír automatikusan megjelent.', 0 );
+        delete_post_meta( $post->ID, '_pnw_scheduled_for' );
+        delete_post_meta( $post->ID, '_pnw_scheduled_by' );
+        PNW_Notifications::scheduled_published( (int) $post->ID );
     }
 
     public static function delete_news(): void {
