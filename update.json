@@ -1,8 +1,8 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Publikált hírek visszaállítható archiválása. A Kint lévő hírek listában piros Archiválás gomb jelent meg: a hír azonnal eltűnik a nyilvános oldalról, de nem törlődik. Új Archívum nézetből egy kattintással visszaállítható és újrapublikálható. Az archiválás és visszaállítás auditnaplóba kerül; a régi Lomtár végpont is biztonságosan archiválásra lett átirányítva."
+  "changelog": "Kategória-kötelezőség felhasználóbarát javítása. Ha a hírszerkesztőben nincs kategória kiválasztva, az űrlap már elküldés előtt megáll, a kategória blokk piros kiemelést és egyértelmű hibaüzenetet kap, az oldal odagörget, és a már beírt cím, szöveg vagy kiválasztott kép nem vész el. A szerveroldali ellenőrzés biztonsági tartalékként megmaradt."
 }
