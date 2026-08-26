@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.0 - 2026-08-26
+
+- Automatikus piszkozatmentés került a hírszerkesztőbe: a böngésző néhány másodpercenként helyi biztonsági másolatot készít, kategória kiválasztása után pedig 30 másodpercenként WordPress-piszkozatba is ment.
+- Félbehagyott új hír esetén a Hírkezelő felajánlja a legutóbbi helyi biztonsági mentés visszaállítását.
+- Új hírsablon-választó: **Versenyeredmény**, **Esemény / rendezvény**, **Tájékoztató**, **Kirándulás / programbeszámoló**, **Pályázat / felhívás**.
+- A sablonok egyszerű, tanárok számára kitölthető szerkezetet készítenek elő a vizuális szerkesztőben.
+- A vezető a jóváhagyáskor választhat **Azonnali** vagy **Időzített** publikálást.
+- Időzített publikálásnál a plugin a WordPress szabványos `future` státuszát és ütemezését használja; a hír a megadott időpontban automatikusan publikálódik.
+- Az időzítésről és a tényleges automatikus megjelenésről e-mail értesítés és auditnapló-bejegyzés készül.
+- Az Áttekintésben külön láthatók a következő időzített hírek és az időzített darabszámok.
+- Jelentősen javult a mobilos szerkesztés: nagyobb érintési célok, egyoszlopos vezérlők, 16 px-es űrlapmezők, mobilbarát képkezelés, görgethető szerkesztőeszköztár és navigáció.
+- Új **Statisztika** menüpont vezetőknek és webadminnak: kint lévő hírek, workflow-publikációk, időzített és jóváhagyásra váró hírek, archívum, havi publikációk, átlagos jóváhagyási idő, 6 havi trend, legaktívabb beküldők és leggyakoribb kategóriák.
+- A GitHub Actions ellenőrzés mostantól a PHP 7.4 szintaxis mellett az összes frontend JavaScript fájlt is `node --check` vizsgálattal ellenőrzi.
+
+## 1.1.2 - 2026-08-26
+
+- Kategória nélkül a hírszerkesztő már elküldés előtt megállítja az űrlapot.
+- A Kategória blokk piros kiemelést és egyértelmű hibaüzenetet kap, az oldal odagörget, és a már beírt tartalom nem vész el.
+- A szerveroldali kategória-ellenőrzés biztonsági tartalékként megmaradt.
+
+## 1.1.1 - 2026-08-26
+
+- A publikált hírek törlése helyett visszaállítható **Archiválás** került a rendszerbe.
+- Az archivált hír azonnal eltűnik a nyilvános oldalról, de tartalma, képe, kategóriái és szerzője megmarad.
+- Új **Archívum** nézetből egy kattintással visszaállítható és újrapublikálható.
+- Az archiválás és visszaállítás auditnaplóba kerül.
+- A korábbi Lomtár-végpont kompatibilitási okból szintén archiválásra irányít.
+
 ## 1.1.0 - 2026-08-26
 
 - A plugin production módba került: `PNW_TEST_MODE` kikapcsolva.
@@ -8,7 +36,7 @@
 - Az MK-vezető, igazgatóhelyettes és igazgató szerepkörök a dedikált frontend Hírkezelőt használják; a normál wp-admin felület webadmin/adminisztrátor számára marad elérhető.
 - A frontend működéshez szükséges `admin-post.php`, AJAX és médiafeltöltési végpontok továbbra is engedélyezettek.
 - A Hírkezelő productionben is `noindex, nofollow`, no-cache védelmet kap, és nem jelenik meg a publikus WordPress navigációban.
-- A publikált hírek kezelőfelületén a régi és új hírek szerkeszthetők, illetve Lomtárba helyezhetők a megfelelő vezetői jogosultsággal.
+- A publikált hírek kezelőfelületén a régi és új hírek szerkeszthetők a megfelelő vezetői jogosultsággal.
 - A GitHub-alapú natív WordPress updater marad az éles frissítési csatorna.
 
 ## 1.0.19-test - 2026-08-26
@@ -36,7 +64,7 @@
 ## 1.0.13-test - 2026-08-26
 
 - Új **Kint lévő hírek** felület az összes publikált WordPress-bejegyzéshez, beleértve a plugin előtti híreket is.
-- Production módban szerkesztés és Lomtárba helyezés támogatása vezetői jogosultsággal.
+- Production módban szerkesztés és publikált hírek kezelése vezetői jogosultsággal.
 
 ## 1.0.9-test - 2026-08-24
 
