@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.1 - 2026-08-26
+
+- A saját piszkozatok most közvetlenül az Áttekintés táblázatából is törölhetők külön **Törlés** gombbal.
+- A gyors törlés csak még be nem küldött `draft` állapotú, szerkeszthető piszkozatnál jelenik meg; jóváhagyásra váró, időzített vagy publikált hírt nem érint.
+- A Hírsablonok mellé új **Tiszta lap** gomb került. Ezzel egy alkalmazott sablon után egy kattintással üres hírre lehet váltani.
+- A Tiszta lap megerősítés után törli a piszkozat címét, szövegét, kivonatát, kategóriáit és a hozzá kapcsolt kiemelt képet; a médiatárban lévő képfájlt nem törli.
+- Ha az automatikus mentés már létrehozott WordPress-piszkozatot, a Tiszta lap azt is szerveroldalon kiüríti, így nem marad rejtve a korábbi sablon tartalma.
+- Javításra visszaküldött híren a Tiszta lap nem jelenik meg, így a vezető által visszaküldött tartalom nem nullázható véletlenül.
+- A piszkozat törlése és a Tiszta lap használata is jogosultság- és nonce-ellenőrzött AJAX végpontot használ, valamint auditnaplóba kerül.
+
 ## 1.2.0 - 2026-08-26
 
 - Automatikus piszkozatmentés került a hírszerkesztőbe: a böngésző néhány másodpercenként helyi biztonsági másolatot készít, kategória kiválasztása után pedig 30 másodpercenként WordPress-piszkozatba is ment.
