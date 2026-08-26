@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class PNW_UX {
     public static function init(): void {
         add_action( 'wp_ajax_pnw_autosave_news', array( __CLASS__, 'autosave_news' ) );
+        add_action( 'wp_ajax_pnw_reset_draft', array( __CLASS__, 'reset_draft' ) );
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ), 40 );
     }
 
@@ -29,10 +30,25 @@ final class PNW_UX {
             PNW_VERSION
         );
 
+        wp_enqueue_style(
+            'pnw-draft-tools',
+            PNW_URL . 'assets/css/pnw-draft-tools.css',
+            array( 'pnw-app', 'pnw-ux' ),
+            PNW_VERSION
+        );
+
         wp_enqueue_script(
             'pnw-ux',
             PNW_URL . 'assets/js/pnw-ux.js',
             array( 'pnw-app' ),
+            PNW_VERSION,
+            true
+        );
+
+        wp_enqueue_script(
+            'pnw-draft-tools',
+            PNW_URL . 'assets/js/pnw-draft-tools.js',
+            array( 'pnw-ux' ),
             PNW_VERSION,
             true
         );
@@ -46,6 +62,7 @@ final class PNW_UX {
             array(
                 'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
                 'autosaveNonce'    => wp_create_nonce( 'pnw_autosave_news' ),
+                'resetNonce'       => wp_create_nonce( 'pnw_reset_draft' ),
                 'autosaveInterval' => 30000,
                 'userId'           => get_current_user_id(),
                 'managerUrl'       => PNW_Plugin::manager_url(),
@@ -137,6 +154,50 @@ final class PNW_UX {
                 'status'  => $status,
             )
         );
+    }
+
+    public static function reset_draft(): void {
+        if ( ! is_user_logged_in() || ! current_user_can( 'pnw_submit_news' ) ) {
+            wp_send_json_error( array( 'message' => 'Nincs jogosultságod a piszkozat kiürítéséhez.' ), 403 );
+        }
+
+        check_ajax_referer( 'pnw_reset_draft', 'nonce' );
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        $post    = $post_id ? get_post( $post_id ) : null;
+
+        if ( ! $post || 'post' !== $post->post_type || 'draft' !== $post->post_status ) {
+            wp_send_json_error( array( 'message' => 'Csak saját, még be nem küldött piszkozat üríthető ki.' ), 409 );
+        }
+
+        if ( ! PNW_Access::can_edit_workflow_post( $post_id ) ) {
+            wp_send_json_error( array( 'message' => 'Ezt a piszkozatot nem módosíthatod.' ), 403 );
+        }
+
+        $result = wp_update_post(
+            array(
+                'ID'           => $post_id,
+                'post_title'   => '',
+                'post_content' => '',
+                'post_excerpt' => '',
+                'post_status'  => 'draft',
+            ),
+            true
+        );
+
+        if ( is_wp_error( $result ) ) {
+            wp_send_json_error( array( 'message' => 'A piszkozat kiürítése most nem sikerült.' ), 500 );
+        }
+
+        // A Tiszta lap valóban üres szerkesztési állapotot ad. A médiatárban lévő
+        // fájlt nem töröljük, csak leválasztjuk erről a piszkozatról.
+        wp_set_object_terms( $post_id, array(), 'category' );
+        delete_post_thumbnail( $post_id );
+        delete_post_meta( $post_id, '_pnw_review_note' );
+        delete_post_meta( $post_id, '_pnw_autosaved_at' );
+        PNW_Audit::log( $post_id, 'draft_reset', 'draft', 'draft', 'A szerző tiszta lappal újrakezdte a piszkozatot.' );
+
+        wp_send_json_success( array( 'postId' => $post_id ) );
     }
 
     private static function is_manager_page(): bool {
