@@ -97,8 +97,7 @@
             select.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        const recovery = $('.pnw-recovery-banner', form);
-        recovery?.remove();
+        $('.pnw-recovery-banner', form)?.remove();
 
         const postId = parseInt($('input[name="post_id"]', form)?.value || '0', 10) || 0;
         clearLocal(postId);
@@ -178,5 +177,83 @@
         });
     };
 
-    document.addEventListener('DOMContentLoaded', installCleanSlateButton);
+    const draftIdFromRow = (row) => {
+        const editLink = $('a[href*="pnw_view=edit"][href*="post_id="]', row);
+        if (!editLink) {
+            return 0;
+        }
+        try {
+            return parseInt(new URL(editLink.href, window.location.href).searchParams.get('post_id') || '0', 10) || 0;
+        } catch (error) {
+            return 0;
+        }
+    };
+
+    const deleteDraft = async (postId, button) => {
+        if (!config.ajaxUrl || !config.deleteDraftNonce) {
+            window.alert('A piszkozat törlése jelenleg nem érhető el.');
+            return;
+        }
+
+        if (!window.confirm('Biztosan törlöd ezt a piszkozatot? A hír a WordPress Lomtárába kerül.')) {
+            return;
+        }
+
+        button.disabled = true;
+        const original = button.textContent;
+        button.textContent = 'Törlés…';
+
+        const body = new FormData();
+        body.append('action', 'pnw_delete_draft');
+        body.append('nonce', config.deleteDraftNonce);
+        body.append('post_id', String(postId));
+
+        try {
+            const response = await fetch(config.ajaxUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body,
+            });
+            const payload = await response.json();
+            if (!payload?.success) {
+                throw new Error(payload?.data?.message || 'A piszkozat törlése nem sikerült.');
+            }
+
+            clearLocal(postId);
+            const target = new URL(config.managerUrl || window.location.href, window.location.href);
+            target.searchParams.set('pnw_notice', 'trashed');
+            window.location.assign(target.toString());
+        } catch (error) {
+            window.alert(error.message || 'A piszkozat törlése nem sikerült.');
+            button.textContent = original;
+            button.disabled = false;
+        }
+    };
+
+    const installDraftDeleteButtons = () => {
+        $$('.pnw-table tbody tr').forEach((row) => {
+            if (!$('.pnw-badge-draft', row) || $('[data-pnw-quick-delete]', row)) {
+                return;
+            }
+
+            const postId = draftIdFromRow(row);
+            const actions = $('.pnw-actions', row);
+            if (!postId || !actions) {
+                return;
+            }
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'pnw-button pnw-button-danger pnw-button-small pnw-quick-delete-button';
+            button.dataset.pnwQuickDelete = '1';
+            button.textContent = 'Törlés';
+            button.addEventListener('click', () => deleteDraft(postId, button));
+            actions.append(button);
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        installCleanSlateButton();
+        installDraftDeleteButtons();
+    });
 })();
