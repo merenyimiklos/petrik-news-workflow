@@ -38,10 +38,25 @@ final class PNW_UX {
             PNW_VERSION
         );
 
+        wp_enqueue_style(
+            'pnw-dialogs',
+            PNW_URL . 'assets/css/pnw-dialogs.css',
+            array( 'pnw-app', 'pnw-ux', 'pnw-draft-tools' ),
+            PNW_VERSION
+        );
+
+        wp_enqueue_script(
+            'pnw-dialogs',
+            PNW_URL . 'assets/js/pnw-dialogs.js',
+            array( 'pnw-app' ),
+            PNW_VERSION,
+            true
+        );
+
         wp_enqueue_script(
             'pnw-ux',
             PNW_URL . 'assets/js/pnw-ux.js',
-            array( 'pnw-app' ),
+            array( 'pnw-app', 'pnw-dialogs' ),
             PNW_VERSION,
             true
         );
@@ -49,7 +64,7 @@ final class PNW_UX {
         wp_enqueue_script(
             'pnw-draft-tools',
             PNW_URL . 'assets/js/pnw-draft-tools.js',
-            array( 'pnw-ux' ),
+            array( 'pnw-ux', 'pnw-dialogs' ),
             PNW_VERSION,
             true
         );
@@ -68,7 +83,7 @@ final class PNW_UX {
                 'autosaveInterval' => 30000,
                 'userId'           => get_current_user_id(),
                 'managerUrl'       => PNW_Plugin::manager_url(),
-                'scheduleMin'      => $minimum->format( 'Y-m-d\TH:i' ),
+                'scheduleMin'      => $minimum->format( 'Y-m-d\\TH:i' ),
                 'timezone'         => wp_timezone_string() ?: 'Europe/Budapest',
             )
         );
