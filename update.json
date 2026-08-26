@@ -1,8 +1,8 @@
 {
-  "version": "1.0.19-test",
+  "version": "1.1.0",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Szerkesztő stabilitási javítás: a Hírkezelő vizuális szerkesztőjéből eltávolítottuk a hibás link beszúrása és link törlése gombokat. Ezek a frontendes TinyMCE nézetben az oldal aljára ugrást okoztak. A korábban problémás teljes képernyős gomb sincs már a toolbaron."
+  "changelog": "Első production kiadás. A vezetői jóváhagyás után a workflow-hír ténylegesen publikálódik. Az MK-vezető, igazgatóhelyettes és igazgató a frontend Hírkezelőt használja, a normál wp-admin webadminnak marad. A Hírkezelő productionben is noindex/no-cache és rejtve marad a publikus navigációból. A korábbi teszt-jóváhagyott hírek nem publikálódnak automatikusan."
 }
