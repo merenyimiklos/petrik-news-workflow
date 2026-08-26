@@ -1,4 +1,4 @@
-name: PHP lint
+name: PHP and JS lint
 
 on:
   push:
@@ -26,3 +26,10 @@ jobs:
           set -euo pipefail
           php -v
           find . -type f -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          find assets/js -type f -name '*.js' -print0 | xargs -0 -n1 node --check
