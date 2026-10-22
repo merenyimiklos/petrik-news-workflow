@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.5 - 2026-10-22
+
+- A plugin minimum PHP-követelménye **PHP 8.3** lett a petrik.hu szerverfrissítéséhez igazítva.
+- A GitHub Actions ellenőrzés célverziója PHP 8.3; minden PHP fájl ezen a verzión lintelődik.
+- A JavaScript szintaxisellenőrzés változatlanul megmaradt.
+- A kiadás a korábbi 1.2.4 migrációs verzió után lezárja a PHP 7.4 kompatibilitási átmenetet.
+
 ## 1.2.1 - 2026-08-26
 
 - A saját piszkozatok most közvetlenül az Áttekintés táblázatából is törölhetők külön **Törlés** gombbal.
