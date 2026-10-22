@@ -1,8 +1,8 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.5",
   "requires": "6.4",
-  "requires_php": "7.4",
+  "requires_php": "8.3",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "PHP 8.3 migrációs kompatibilitási frissítés. A Petrik News Workflow CI mostantól PHP 7.4 és PHP 8.3 alatt is ellenőrzi az összes PHP fájlt, valamint továbbra is ellenőrzi a JavaScript szintaxist. A minimum PHP-követelmény átmenetileg 7.4 marad, hogy a frissítés még a szerver PHP-verziójának átállítása előtt telepíthető legyen."
+  "changelog": "PHP 8.3 production frissítés: a Petrik News Workflow minimum PHP-követelménye 8.3-ra emelkedett a petrik.hu szerverfrissítéséhez igazítva. A CI célverziója PHP 8.3, az összes PHP fájl ezen a verzión ellenőrzött; a JavaScript syntax check továbbra is aktív."
 }
