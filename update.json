@@ -1,8 +1,8 @@
 {
-  "version": "1.2.3",
+  "version": "1.2.4",
   "requires": "6.4",
   "requires_php": "7.4",
   "tested": "6.8.8",
   "package": "https://github.com/merenyimiklos/petrik-news-workflow/archive/refs/heads/main.zip",
-  "changelog": "Egyedi Petrik-stílusú popup rendszer: a piszkozat törlése, Tiszta lap, sabloncsere, archiválás, visszaállítás és a kapcsolódó hibaüzenetek már nem a böngésző alapértelmezett confirm/alert ablakait használják. A veszélyes műveletek piros, a visszaállítás zöld, az információs és sablonműveletek kék/sárga egyedi modalt kapnak; sötétített háttérrel, saját gombokkal, mobilbarát nézettel, Escape- és billentyűzet-kezeléssel. Az időzített publikálás datetime-local formátuma is pontosítva lett."
+  "changelog": "PHP 8.3 migrációs kompatibilitási frissítés. A Petrik News Workflow CI mostantól PHP 7.4 és PHP 8.3 alatt is ellenőrzi az összes PHP fájlt, valamint továbbra is ellenőrzi a JavaScript szintaxist. A minimum PHP-követelmény átmenetileg 7.4 marad, hogy a frissítés még a szerver PHP-verziójának átállítása előtt telepíthető legyen."
 }
