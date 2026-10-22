@@ -3,20 +3,20 @@
  * Plugin Name: Petrik News Workflow
  * Plugin URI:  https://github.com/merenyimiklos/petrik-news-workflow
  * Description: Belső hírbeküldési és vezetői jóváhagyási workflow a Petrik WordPress oldalához.
- * Version:     1.2.4
+ * Version:     1.2.5
  * Author:      Petrik
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: petrik-news-workflow
  * Requires at least: 6.4
- * Requires PHP: 7.4
+ * Requires PHP: 8.3
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'PNW_VERSION', '1.2.4' );
+define( 'PNW_VERSION', '1.2.5' );
 define( 'PNW_FILE', __FILE__ );
 define( 'PNW_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PNW_URL', plugin_dir_url( __FILE__ ) );
